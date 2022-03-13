@@ -1,0 +1,11 @@
+*.swp
+__pycache__/
+acciones/*.swp
+acciones/__pycache__/
+clases/*.swp
+clases/__pycache__/
+config/*.swp
+config/__pycache__/
+extras/*.swp
+extras/__pycache__/
+progs/__pycache__/
