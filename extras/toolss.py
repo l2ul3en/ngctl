@@ -131,17 +131,27 @@ def copy_host(datos,old,new,ip, ip_old):
 			if b: datos[-1].add_valor('check_command', value)
 			logger.info(f'se copio correctamente la alarma {datos[-1].get_name()}', extra=cons.EXTRA)
 
-def copy_alarma(datos,old,new):
+def copy_alarma(datos,old,new,host=None):
 	"""Realiza la copia de la alarma old hacia el host new."""
-	copia = Alarma()
-	for i in range(len(datos)):
-		if datos[i].get_name() == old and datos[i].get_tipo() == 'define service{':
-			copia = copiar(datos[i])
-			datos.append(copia)
-			name = datos[-1].get_name().replace(datos[-1].get_host(),new)
-			datos[-1].add_valor('service_description',name)
-			datos[-1].add_valor('host_name',new)
-			logger.info(f'se copio correctamente {old} a {name}', extra=cons.EXTRA)
+	#copia = Alarma()
+	if host != None:
+		for i in range(len(datos)):
+			if datos[i].get_host() == host and datos[i].get_name() == old and datos[i].get_tipo() == 'define service{':
+				copia = copiar(datos[i])
+				datos.append(copia)
+				name = datos[-1].get_name().replace(datos[-1].get_host(),new)
+				datos[-1].add_valor('service_description',name)
+				datos[-1].add_valor('host_name',new)
+				logger.info(f'se copio correctamente {old}/{host} a {name}', extra=cons.EXTRA)
+	else:
+		for i in range(len(datos)):
+			if datos[i].get_name() == old and datos[i].get_tipo() == 'define service{':
+				copia = copiar(datos[i])
+				datos.append(copia)
+				name = datos[-1].get_name().replace(datos[-1].get_host(),new)
+				datos[-1].add_valor('service_description',name)
+				datos[-1].add_valor('host_name',new)
+				logger.info(f'se copio correctamente {old} a {name}', extra=cons.EXTRA)
 
 def existe_alarma(datos,name, host=None):
 	return get_frec_alarma(datos,name,host) >= 1

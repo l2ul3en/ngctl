@@ -45,7 +45,7 @@ def exec_servicio(args):
 	elif args.delete:
 		call.eliminar_alarma(lista_alarmas, args.service_name, args.host)
 	elif args.copy != None:
-		call.copiar_servicio(lista_alarmas,args.service_name,args.copy)
+		call.copiar_servicio(lista_alarmas,args.service_name,args.copy, args.host)
 	else: alarma.print_usage()
 	status(exec_servicio.__name__)
 
@@ -215,7 +215,7 @@ def create_command():
 	group_alarma.add_argument('-d', '--delete', action='store_true',default=False,help='elimina a service_name')
 	group_alarma.add_argument('-r', '--rename',metavar='NEW_NAME',help='cambia el nombre de service_name con NEW_NAME')
 	group_alarma.add_argument('-s', '--show', action='store_true',default=False,help='muestra la configuracion de service_name')
-	group_opc.add_argument('--host',help='especifica HOST para una busqueda precisa; trabaja con -s/-r/-d')
+	group_opc.add_argument('--host',help='especifica HOST para una busqueda mas precisa')
 	alarma.set_defaults(func=exec_servicio)
 
 	#An edit service subcomand

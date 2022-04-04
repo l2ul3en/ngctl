@@ -65,13 +65,14 @@ def eliminar_alarma(lista, key, host=None):
 		else: logger.warning(f'no se encontro la alarma {key} definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
 	logger.info('finalizando eliminar_alarma', extra=cons.EXTRA)
 
-def copiar_servicio(lista, key, new):
+def copiar_servicio(lista, key, new, host=None):
 	logger.info('iniciando copiar_servicio', extra=cons.EXTRA)
-	if tser.existe_alarma(lista, key):
-		tser.copy_alarma(lista, key, new)
+	if tser.existe_alarma(lista, key, host):
+		tser.copy_alarma(lista, key, new, host)
 		tser.aplicar_cambios(lista)
 	else:
-		logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+		if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+		else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
 	logger.info('finalizando copiar_servicio', extra=cons.EXTRA)
 
 def eliminar_atributo(lista,key, atributo):
