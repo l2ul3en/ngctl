@@ -27,8 +27,8 @@ def aplicar_cambios(datos):
 	with open(cons.TMP_SRV, 'w') as f:
 		for i in datos:
 			print(i,file=f,flush=True)
-	c = geto('$(which cp) -f ' + cons.DIR + cons.ORIG_SRV + ' ' + cons.DIR_BK + cons.BACK_SRV)
-	c = geto('$(which cp) -f ' + cons.TMP_SRV + ' ' + cons.DIR + cons.ORIG_SRV)
+	c = geto(f'cp -f {cons.DIR}{cons.ORIG_SRV} {cons.BACK_SRV}')
+	c = geto(f'cp -f {cons.TMP_SRV} {cons.DIR}{cons.ORIG_SRV}')
 	logger.info(f'OK backup!!/se aplico los cambios a {cons.ORIG_SRV}', extra=cons.EXTRA)
 
 def cargar():

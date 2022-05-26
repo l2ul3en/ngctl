@@ -27,8 +27,8 @@ def aplicar_cambios(datos):
 	with open(cons.TMP_HST, 'w') as f:
 		for i in datos:
 			print(i,file=f,flush=True)
-	c = geto('$(which cp) -f ' + cons.DIR + cons.ORIG_HST + ' ' + cons.DIR_BK + cons.BACK_HST)
-	c = geto('$(which cp) -f ' + cons.TMP_HST + ' ' + cons.DIR + cons.ORIG_HST)
+	c = geto(f'cp -f {cons.DIR}{cons.ORIG_HST} {cons.BACK_HST}')
+	c = geto(f'cp -f {cons.TMP_HST} {cons.DIR}{cons.ORIG_HST}')
 	logger.info(f'OK Backup!!/se aplico los cambios a {cons.ORIG_HST}', extra=cons.EXTRA)
 
 def cargar():

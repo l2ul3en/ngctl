@@ -27,8 +27,8 @@ def aplicar_cambios(datos):
 	with open(cons.TMP_HGR, 'w') as f:
 		for i in datos:
 			print(i,file=f,flush=True)
-	c = geto('$(which cp) -f ' + cons.DIR + cons.ORIG_HGR + ' ' + cons.DIR_BK + cons.BACK_HGR)
-	c = geto('$(which cp) -f ' + cons.TMP_HGR + ' ' + cons.DIR + cons.ORIG_HGR)
+	c = geto(f'cp -f {cons.DIR}{cons.ORIG_HGR} {cons.BACK_HGR}')
+	c = geto(f'cp -f {cons.TMP_HGR} {cons.DIR}{cons.ORIG_HGR}')
 	logger.info(f'OK backup!!/se aplico los cambios a {cons.ORIG_HGR}', extra=cons.EXTRA)
 
 def cargar():

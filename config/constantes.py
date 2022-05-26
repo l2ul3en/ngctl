@@ -3,23 +3,35 @@ from subprocess import getoutput as geto
 from sys import path
 path.append('../../')
 
+#usuario que ejecuta la app
 EXTRA = {'user' : geto('whoami')}
-DIR = '/home/manfred/projects/nagiosctl/objectsVAP/'  #path completo a los archivos (.cfg) de configuracion de nagios
-DIR_BK = '/home/manfred/projects/nagiosctl/bk/'  #path completo donde se guardaran los archivos de respaldo luego de un cambio (solo se guarda el ultimo cambio)
 
-ORIG_SRV = 'services.cfg' # archivo original services.cfg
-BACK_SRV = 'bk/' + ORIG_SRV + '.bk'
-ORIG_HST = 'hosts.cfg' # archivo original hosts.cfg
-BACK_HST = 'bk/' + ORIG_HST + '.bk'
-ORIG_HGR = 'hostgroups.cfg' # archivo original hostgroup.cfg
-BACK_HGR = 'bk/' + ORIG_HGR + '.bk'
+#archivo de log de la app
+LOG = '/var/log/nagios/nagiosctl.log'
 
-TMP_SRV = DIR_BK + 'tmp/' + ORIG_SRV + '.tmp' # archivo temporal para escribir los cambios
-TMP_HST = DIR_BK + 'tmp/' + ORIG_HST + '.tmp' # archivo temporal para escribir los cambios
-TMP_HGR = DIR_BK + 'tmp/' + ORIG_HGR + '.tmp' # archivo temporal para escribir los cambios
+#archivo de configuracion del logger de python
+LOG_CONF = '/data/source/ngctl/config/logging.conf' 
 
-LOG = '/var/log/nagios/nagiosctl.log' #path completo donde se almacenaran el log
-LOG_CONF = '/home/manfred/projects/nagiosctl/v3/ngctl/config/logging.conf' #path completo al archivo de configuracion del logger
+#directorios de trabajo de la app 
+DIR = '/data/objects/'  #path completo a los archivos (.cfg) de configuracion de nagios
+DIR_BK = '/data/backup/'  #path completo donde se guardaran los archivos de respaldo luego de un cambio (solo se guarda el ultimo cambio)
+DIR_TMP = '/data/cache/'  #path completo donde se guardaran los archivos temporales
+
+#si se procesaran nuevos archivos de configuracion se deben agregar 3 nuevas constantes para su funcionamiento
+#1. Archivos de objetos de configuracion nagios
+ORIG_SRV = 'services.cfg'
+ORIG_HST = 'hosts.cfg'
+ORIG_HGR = 'hostgroups.cfg'
+
+#2. Archivos de respaldo de configuracion nagios
+BACK_SRV = f'{DIR_BK}{ORIG_SRV}.bk'
+BACK_HST = f'{DIR_BK}{ORIG_HST}.bk'
+BACK_HGR = f'{DIR_BK}{ORIG_HGR}.bk'
+
+#3. Archivo temporal para escribir los cambios
+TMP_SRV = f'{DIR_TMP}{ORIG_SRV}.tmp' 
+TMP_HST = f'{DIR_TMP}{ORIG_HST}.tmp' 
+TMP_HGR = f'{DIR_TMP}{ORIG_HGR}.tmp' 
 
 if __name__ == '__main__':
 	pass
