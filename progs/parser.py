@@ -10,7 +10,7 @@
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
 from sys import path, exit as kill
-path.append('/home/manfred/projects/nagiosctl/v3/')
+path.append('/data/source/')
 import ngctl.acciones.caller as call
 import ngctl.config.constantes as cons
 import logging,argparse,logging.config
