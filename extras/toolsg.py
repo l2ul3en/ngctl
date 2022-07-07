@@ -29,7 +29,7 @@ def aplicar_cambios(datos):
             print(i,file=f,flush=True)
     c = geto(f'cp -f {cons.DIR}{cons.ORIG_HGR} {cons.BACK_HGR}')
     c = geto(f'cp -f {cons.TMP_HGR} {cons.DIR}{cons.ORIG_HGR}')
-    logger.info(f'OK backup!!/se aplico los cambios a {cons.ORIG_HGR}', extra=cons.EXTRA)
+    logger.info(f'OK Backup!!/se aplico los cambios a {cons.ORIG_HGR}', extra=cons.EXTRA)
 
 def cargar():
     """Devuelve una lista de objetos Hostgroup.
@@ -41,11 +41,11 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
     with open (cons.DIR + cons.ORIG_HGR,'r') as f:
         for i in f:
             i = i.strip()
-            if i == '' or i.startswith(('define','#')): # or i.startswith('define'):
+            if i == '' or i.startswith(('define','#')):
                 continue
             elif i.startswith('}'):
                 hostgroup.ordenar(rev=False)
-                if hostgroup.existe_atributo('members',False):
+                if hostgroup.existe_atributo('members',log=False):
                     lista_group.append(hostgroup)
                 hostgroup = Hostgroup()
             else:

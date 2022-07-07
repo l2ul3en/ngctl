@@ -52,17 +52,17 @@ def exec_servicio(args):
 def exec_servicio_atrib(args):
     status(exec_servicio_atrib.__name__)
     if args.delete:
-        call.eliminar_atributo(lista_alarmas,args.service_name,args.atributo)
+        call.eliminar_atributo(lista_alarmas, args.service_name, args.atributo, args.host)
     elif args.get:
-        call.mostrar_atributo(lista_alarmas,args.service_name,args.atributo)
+        call.mostrar_atributo(lista_alarmas, args.service_name, args.atributo, args.host)
     elif args.modify != None:
-        call.modificar_atributo(lista_alarmas,args.service_name,args.atributo,args.modify)
+        call.modificar_atributo(lista_alarmas, args.service_name, args.atributo, args.modify, args.host)
     elif args.del_elemento != None:
-        call.eliminar_elemento(lista_alarmas, args.service_name, args.atributo, args.del_elemento)
+        call.eliminar_elemento(lista_alarmas, args.service_name, args.atributo, args.del_elemento, args.host)
     elif args.add_elemento != None:
-        call.agregar_elemento(lista_alarmas, args.service_name, args.atributo, args.add_elemento)
+        call.agregar_elemento(lista_alarmas, args.service_name, args.atributo, args.add_elemento, args.host)
     elif args.new != None:
-        call.agregar_parametro(lista_alarmas, args.service_name, args.atributo, args.new)
+        call.agregar_parametro(lista_alarmas, args.service_name, args.atributo, args.new, args.host)
     else: edit_alarm.print_usage()
     status(exec_servicio_atrib.__name__)
 
@@ -264,6 +264,7 @@ def create_command():
     edit_host.set_defaults(func=exec_hostname_atrib)
 
     args = parser.parse_args()
+#    print(args)
     args.func(args)
 
 if __name__ == '__main__':

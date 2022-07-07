@@ -46,7 +46,7 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
                 continue
             elif i.startswith('}'):
                 host.add_tipo(regex.sub('',host.get_valor('define')))
-                host.del_parametro('define')
+                host.del_parametro('define',log=False)
                 host.ordenar(rev=True)
                 lista_hosts.append(host)
                 host = Host()

@@ -42,7 +42,9 @@ def modificar_atributo(lista, key, atributo, new, host=None):
         if alarma.existe_atributo(atributo):
             alarma.add_valor(atributo, new)
             tser.aplicar_cambios(lista)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else: 
+            if host != None: logger.warning(f'no existe el atributo {atributo} en el host {host}', extra=cons.EXTRA)
+            else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
     logger.info('finalizando modificar_atributo', extra=cons.EXTRA)
 
 def mostrar_alarma(lista, alarma, host=None):
@@ -75,74 +77,86 @@ def copiar_servicio(lista, key, new, host=None):
         else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
     logger.info('finalizando copiar_servicio', extra=cons.EXTRA)
 
-def eliminar_atributo(lista,key, atributo):
+def eliminar_atributo(lista,key, atributo, host=None):
     logger.info('iniciando eliminar_atributo', extra=cons.EXTRA)
-    if not tser.existe_alarma(lista, key):
-        logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+    if not tser.existe_alarma(lista, key, host):
+        if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
     else:
-        alarma = tser.get_alarma(lista, key)
+        alarma = tser.get_alarma(lista, key, host)
         if alarma.existe_atributo(atributo):
             alarma.del_parametro(atributo)
             tser.aplicar_cambios(lista)
         else:
-            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            if host != None: logger.warning(f'no existe el atributo {atributo} en el host {host}', extra=cons.EXTRA)
+            else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
     logger.info('finalizando eliminar_atributo', extra=cons.EXTRA)
 
-def eliminar_elemento(lista, key, atributo, dato): #solo se puede eliminar un elem a la vez
+def eliminar_elemento(lista, key, atributo, dato, host=None): #solo se puede eliminar un elem a la vez
     logger.info('iniciando eliminar_elemento', extra=cons.EXTRA)
-    if not tser.existe_alarma(lista, key):
-        logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+    if not tser.existe_alarma(lista, key, host):
+        if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
     else:
-        alarma = tser.get_alarma(lista, key)
+        alarma = tser.get_alarma(lista, key, host)
         if alarma.existe_atributo(atributo):
             if alarma.existe_elemento(atributo, dato):
                 alarma.del_elemento(atributo, dato)
                 tser.aplicar_cambios(lista)
-            else:
-                logger.warning(f'no existe el elemento {dato}', extra=cons.EXTRA)
+            else: logger.warning(f'no existe el elemento {dato}', extra=cons.EXTRA)
         else:
-            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            if host != None: logger.warning(f'no existe el atributo {atributo} en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            else: logger.warning(f'no existe el atributo {atributo} en la alarma {key}', extra=cons.EXTRA)
     logger.info('finalizando eliminar_elemento', extra=cons.EXTRA)
 
-def agregar_elemento(lista, key, atributo, dato): #puede add varios elems separados x , Ej w,c,r
+def agregar_elemento(lista, key, atributo, dato, host=None): #puede add varios elems separados x , Ej w,c,r
     logger.info('iniciando agregar_elemento', extra=cons.EXTRA)
     if not tser.existe_alarma(lista, key):
-        logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
     else:
-        alarma = tser.get_alarma(lista,key)
+        alarma = tser.get_alarma(lista,key, host)
         if alarma.existe_atributo(atributo):
             if not alarma.existe_elemento(atributo, dato):
                 alarma.add_elemento(atributo, dato)
                 tser.aplicar_cambios(lista)
-            else: logger.warning(f'ya existe el elemento {dato} en {key}', extra=cons.EXTRA)
+            else: 
+                if host != None: logger.warning(f'ya existe el elemento {dato} en la alarma {key} del host {host}', extra=cons.EXTRA)
+                else: logger.warning(f'ya existe el elemento {dato} en {key}', extra=cons.EXTRA)
         else:
             alarma.add_parametro([atributo, dato])
-            logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
+            if host != None: logger.info(f'se agrego {atributo} {dato} en la alarma {alarma} del host {host}', extra=cons.EXTRA)
+            else: logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
             tser.aplicar_cambios(lista)
     logger.info('finalizando agregar_elemento', extra=cons.EXTRA)
 
-def agregar_parametro(lista, key, atributo, valor):
+def agregar_parametro(lista, key, atributo, valor, host=None):
     logger.info('iniciando agregar_parametro', extra=cons.EXTRA)
-    if not tser.existe_alarma(lista, key):
-        logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+    if not tser.existe_alarma(lista, key, host):
+        if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
     else:
-        alarma = tser.get_alarma(lista,key)
+        alarma = tser.get_alarma(lista, key, host)
         if not alarma.existe_atributo(atributo):
             alarma.add_parametro([atributo,valor])
-            logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
+            if host != None: logger.info(f'se agrego {atributo} {valor} en el host {host}', extra=cons.EXTRA)
+            else: logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
             tser.aplicar_cambios(lista)
         else: logger.warning(f'ya existe el atributo {atributo} en {key}', extra=cons.EXTRA)
     logger.info('finalizando agregar_parametro', extra=cons.EXTRA)
 
-def mostrar_atributo(lista, key, atributo):
+def mostrar_atributo(lista, key, atributo, host=None):
     logger.info('iniciando mostrar_atributo', extra=cons.EXTRA)
     if not tser.existe_alarma(lista, key):
-        logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
     else:
-        alarma = tser.get_alarma(lista, key)
+        alarma = tser.get_alarma(lista, key, host)
         if alarma.existe_atributo(atributo):
             print(alarma.get_valor(atributo))
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else: 
+            if host != None: logger.warning(f'no existe el atributo {atributo} en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
     logger.info('finalizando mostrar_atributo_host', extra=cons.EXTRA)
 
 #Metodos de HOST

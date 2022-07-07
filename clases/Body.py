@@ -79,14 +79,14 @@ class Body:
                 logger.debug(f'se actualizo el atributo {atr} añadiendo {val}', extra=cons.EXTRA)
                 break
 
-    def del_parametro(self,atr):
+    def del_parametro(self,atr,log=True):
         """Elimina el parametro al que apunta atr."""
         b = False
         for i in range(len(self.__parametros)):
             if self.__parametros[i][0] == atr:
-                b = not b
+                b = True
                 del self.__parametros[i]
-                if atr != 'define':#debido a que en cargar eliminanos este parametro
+                if log:
                     logger.debug(f'se elimino {atr}', extra=cons.EXTRA)
                 break
         if not b:

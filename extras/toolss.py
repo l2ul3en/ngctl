@@ -29,7 +29,7 @@ def aplicar_cambios(datos):
             print(i,file=f,flush=True)
     c = geto(f'cp -f {cons.DIR}{cons.ORIG_SRV} {cons.BACK_SRV}')
     c = geto(f'cp -f {cons.TMP_SRV} {cons.DIR}{cons.ORIG_SRV}')
-    logger.info(f'OK backup!!/se aplico los cambios a {cons.ORIG_SRV}', extra=cons.EXTRA)
+    logger.info(f'OK Backup!!/se aplico los cambios a {cons.ORIG_SRV}', extra=cons.EXTRA)
 
 def cargar():
     """Devuelve una lista de objetos Alarma."""
@@ -43,7 +43,7 @@ def cargar():
                 continue
             elif i.startswith('}'):
                 alarma.add_tipo(regex.sub('',alarma.get_valor('define')))
-                alarma.del_parametro('define')
+                alarma.del_parametro('define', log=False)
                 alarma.ordenar(rev=True)
                 lista_alarmas.append(alarma)
                 alarma = Alarma()
@@ -172,12 +172,13 @@ def get_alarma(datos,name, host=None):
             if alarma.get_host() == host and alarma.get_name() == name:
                 logger.info(f'se obtuvo la alarma {name} en {host}', extra=cons.EXTRA)
                 return alarma
+        logger.error(f'no se encontro la alarma {name} en el host {host}, exit..', extra=cons.EXTRA)
     else:
         for alarma in datos:
             if alarma.get_name() == name:
                 logger.info(f'se obtuvo la alarma {name}', extra=cons.EXTRA)
                 return alarma
-    logger.error(f'no se encontro la alarma {name}, exit..', extra=cons.EXTRA)
+        logger.error(f'no se encontro la alarma {name}, exit..', extra=cons.EXTRA)
     kill(254)
 
 def delete_alarma(datos,name,host=None):
