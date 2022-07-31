@@ -181,7 +181,7 @@ def create_command():
 
     #A hostgroup subcommand
     global hgroup 
-    hgroup = subparsers.add_parser('group',aliases='g',help='procesamiento a nivel de hostgroup')
+    hgroup = subparsers.add_parser('group',help='procesamiento a nivel de hostgroup')
     hgroup.add_argument('hostgroup_name', action='store',help='nombre de hostgroup')
     group_hgr = hgroup.add_mutually_exclusive_group()
     group_hgr.add_argument('-c','--copy',metavar='NEW_HOSTGROUP',action='store',help='copia hostgroup_name para NEW_HOSTGROUP')
@@ -194,7 +194,7 @@ def create_command():
     #An edit hostgroup subcomand
     sub_hgroup = hgroup.add_subparsers()
     global edit_hgroup
-    edit_hgroup = sub_hgroup.add_parser('edit',aliases='e',help='procesamiento a nivel de atributo')
+    edit_hgroup = sub_hgroup.add_parser('edit',help='procesamiento a nivel de atributo')
     edit_hgroup.add_argument('atributo',help='nombre del atributo de hostgroup_name')
     group_edit_hgroup = edit_hgroup.add_mutually_exclusive_group()
     group_edit_hgroup.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade a ELEMENTO en atributo; si no existe el ATRIBUTO lo agrega')
@@ -207,7 +207,7 @@ def create_command():
 
     # An alarm subcommand
     global alarma
-    alarma = subparsers.add_parser('service',aliases='s', help='procesamiento a nivel de servicio')
+    alarma = subparsers.add_parser('service', help='procesamiento a nivel de servicio')
     alarma.add_argument('service_name',help='nombre de la alarma')
     group_alarma = alarma.add_mutually_exclusive_group()
     group_opc = alarma.add_mutually_exclusive_group()
@@ -221,7 +221,7 @@ def create_command():
     #An edit service subcomand
     sub_service = alarma.add_subparsers()
     global edit_alarm
-    edit_alarm = sub_service.add_parser('edit',aliases='e',help='procesamiento a nivel de atributo')
+    edit_alarm = sub_service.add_parser('edit',help='procesamiento a nivel de atributo')
     edit_alarm.add_argument('atributo',help='nombre del atributo de service_name')
     group_edit_alarm = edit_alarm.add_mutually_exclusive_group()
     group_edit_alarm.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade a ELEMENTO en ATRIBUTO; si no existe el ATRIBUTO lo agrega')
@@ -234,7 +234,7 @@ def create_command():
 
     # A hostname subcommand
     global host
-    host = subparsers.add_parser('hostname',aliases='h', help='procesamiento a nivel de host')
+    host = subparsers.add_parser('hostname', help='procesamiento a nivel de host')
     host.add_argument('host_name', action='store',help='nombre de host')
     group_opc = host.add_mutually_exclusive_group()
     group_host = host.add_mutually_exclusive_group()
@@ -252,7 +252,7 @@ def create_command():
     #An edit host subcomand
     sub_host = host.add_subparsers()
     global edit_host
-    edit_host = sub_host.add_parser('edit',aliases='e',help='procesamiento a nivel de atributo')
+    edit_host = sub_host.add_parser('edit',help='procesamiento a nivel de atributo')
     edit_host.add_argument('atributo',help='nombre del atributo de host_name')
     group_edit_host = edit_host.add_mutually_exclusive_group()
     group_edit_host.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade ELEMENTO en ATRIBUTO; si no existe el ATRIBUTO lo agrega')
