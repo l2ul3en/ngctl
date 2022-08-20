@@ -67,14 +67,18 @@ def procesar(cad,char):
     return [atr,val]
 
 def get_hosts(datos):
-    """Devuelve una lista con todos los nombres de hosts."""
-    return [x.get_name() for x in datos if x.get_tipo() == 'define host{']
+    """Genera todos los nombres de hosts."""
+    #return [x.get_name() for x in datos if x.get_tipo() == 'define host{']
+    for x in datos:
+        if x.get_tipo() == 'define host{':
+            yield x.get_name() 
 
-def get_host(datos,host):
+def get_host(datos,host, log=True):
     """Retorna el objeto Host."""
     for i in datos:
         if i.get_name() == host and i.get_tipo() == 'define host{':
-            logger.info(f'se obtuvo el host {host}', extra=cons.EXTRA)
+            if log:
+                logger.info(f'se obtuvo el host {host}', extra=cons.EXTRA)
             return i
     logger.error(f'no se encontro el host {host}, exit..', extra=cons.EXTRA)
     raise SystemExit(2)

@@ -17,7 +17,7 @@ import ngctl.extras.toolsh as thos
 import ngctl.extras.toolsg as thgr
 import ngctl.clases.Body
 import ngctl.clases.Alarma
-import logging,logging.config,re
+import logging, logging.config, re, csv
 from subprocess import getoutput as geto
 
 logging.config.fileConfig(cons.LOG_CONF)
@@ -510,6 +510,29 @@ def buscar_ip_alarma(lista, ip):
         c += 1
     logger.info(f'se encontraron {c} coincidencias para la IP {ip}', extra=cons.EXTRA)
     logger.info('finalizando buscar_ip_alarma', extra=cons.EXTRA)
+
+#export
+def generar_reporte(lista, file_in, file_out, separador_out=',', *atributos):
+    logger.info('iniciando generar_reporte', extra=cons.EXTRA)
+    writer = csv.DictWriter(file_out, fieldnames=atributos, delimiter=separador_out)
+    writer.writeheader()
+    for i in file_in:
+        i = i.strip()
+        if i != '':
+            if isinstance(lista[0], ngctl.clases.Host.Host):
+                obj = thos.get_host(lista, i, log=False)
+            elif isinstance(lista[0], ngctl.clases.Alarma.Alarma):
+                obj = tser.get_alarma(lista, i, log=False)
+            else:
+                obj = thgr.get_hostgroup(lista, i, log=False)
+            data_row = {}
+            for atributo in atributos:
+                if obj.existe_atributo(atributo, log=False):
+                    data_row[atributo] = obj.get_valor(atributo)
+            writer.writerow(data_row)
+            del data_row
+    logger.info(f'Se exportaron {len(lista)} registros a {getattr(file_out, "name")}', extra=cons.EXTRA)
+    logger.info('finalizando generar_reporte', extra=cons.EXTRA)
 
 if __name__ == '__main__':
 

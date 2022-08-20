@@ -68,11 +68,12 @@ def get_hostgroups(datos):
     """Devuelve una lista con todos los nombres de hostgroups."""
     return [x.get_name() for x in datos]
 
-def get_hostgroup(datos,hostgroup):
+def get_hostgroup(datos,hostgroup,log=False):
     """Retorna el objeto Hostgroup."""
     for i in datos:
         if i.get_name() == hostgroup:
-            logger.info(f'se obtuvo el hostgroup {hostgroup}', extra=cons.EXTRA)
+            if log:
+                logger.info(f'se obtuvo el hostgroup {hostgroup}', extra=cons.EXTRA)
             return i
     logger.error(f'no se encontro el hostgroup {hostgroup}, exit..', extra=cons.EXTRA)
     raise SystemExit(2)

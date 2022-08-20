@@ -56,6 +56,11 @@ class Body:
         """Retorna la lista completa de parametros."""
         return self.__parametros
 
+    def get_atributos(self):
+        """Genera la lista completa de atributos."""
+        for i in range(len(self.__parametros)):
+            yield self.__parametros[i][0]
+
     def add_parametro(self,lista):
         """Añade una lista a la lista de parametros [atributo, valor]."""
         self.__parametros.append(lista)

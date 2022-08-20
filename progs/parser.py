@@ -30,8 +30,12 @@ def validar_formato_ip(ip):
     if len(aux) == 4 and 0 <= aux[0] and aux[0] <= 255 and 0 <= aux[1] and aux[1] <= 255 and 0 <= aux[2] and aux[2] <= 255 and 0 <= aux[3] and aux[3] <= 255:
         return ip
     else: 
-        msg = f'{ip} is not a valid IP'
-        raise argparse.ArgumentTypeError(msg)
+        raise argparse.ArgumentTypeError(f'{ip} is not a valid IP')
+
+def validar_longitud_sep(sep):
+    if len(sep) >= 2:
+        raise argparse.ArgumentTypeError(f'{sep!r} must be a 1-character string')
+    return sep
 
 def status(name):
     logger.info(f'{name} [alarmas/hosts/grupos] [{call.get_cantidad_alarmas(lista_alarmas)}/{call.get_cantidad_hosts(lista_hosts)}/{len(lista_grupos)}]', extra=cons.EXTRA)
@@ -144,23 +148,47 @@ def exec_default(args):
 def exec_other(args):
     status(exec_other.__name__)
     if args.buscar != None:
-        if args.buscar[0] == 'alarma':
+        if args.buscar == 'alarma':
             call.search_regexp(lista_alarmas, args.regex)
-        elif args.buscar[0] == 'host':
+        elif args.buscar == 'host':
             call.search_regexp(lista_hosts, args.regex)
         else: call.search_regexp(lista_grupos, args.regex)
     elif args.ip != None:
         try:
             args.regex = validar_formato_ip(args.regex)
         except:
-            print(f'{args.regex} is not a valid IP')
+            print(f'{args.regex!r} is not a valid IP')
             kill(254)
-        if args.ip[0] == 'host':
+        if args.ip == 'host':
             call.buscar_ip_host(lista_hosts, args.regex)
         else:
             call.buscar_ip_alarma(lista_alarmas, args.regex)
     else: other.print_usage()
     status(exec_other.__name__)
+
+def exec_export(args):
+    status(exec_export.__name__)
+    if args.tipo == 'alarma':
+        lista = lista_alarmas
+    elif args.tipo == 'host':
+        lista = lista_hosts
+    else:
+        lista = lista_grupos
+
+    if args.lista_atributos != None:
+        call.generar_reporte(lista, args.Input, args.Output, args.delimiter, *args.columns)
+    elif args.lista_atributos == None:
+        #generar la lista de atributos unicos
+        lista_unicos = list()
+        for obj in lista:
+            for  atributo in obj.get_atributos():
+                lista_unicos.append(atributo)
+        lista_unicos = list(set(lista_unicos))
+        lista_unicos.sort()
+        call.generar_reporte(lista, args.Input, args.Output, args.delimiter, *lista_unicos)
+    else:
+        export.print_usage()
+    status(exec_export.__name__)
 
 def create_command():
     global parser
@@ -170,13 +198,23 @@ def create_command():
     group_def.add_argument('-f','--file',type=argparse.FileType('r'), help='muestra los admins de los Hosts indicados en FILE')
     parser.set_defaults(func=exec_default)
 
+    #A report subcommand
+    global export
+    export = subparsers.add_parser('export',help='Exportar a salida personalizada')
+    export.add_argument('tipo', choices=['alarma','host','grupo'],help='Exporta las definiciones de acuerdo al criterio seleccionado')
+    export.add_argument('-c', '--columns', nargs='*',help='Lista de atributos a exportar en file-out; nombres de columna')
+    export.add_argument('-I', '--Input', metavar='file-in',type=argparse.FileType('r'), default='-', help='ruta al archivo de entrada de datos, sin encabezado; por defecto stdin')
+    export.add_argument('-O', '--Output', metavar='file-out',type=argparse.FileType('w'), default='-', help='ruta al archivo de salida; por defecto stdout')
+    export.add_argument('-d', '--delimiter', default=',', type=validar_longitud_sep, help='Separador de archivo de salida; por defecto ,')
+    export.set_defaults(func=exec_export)
+
     #A other subcommand
     global other
     other = subparsers.add_parser('search',help='Busqueda con expresiones regulares extendidas')
     other.add_argument('regex',help='expresion regular')
     grp_ot = other.add_mutually_exclusive_group()
-    grp_ot.add_argument('-b','--buscar',choices=['alarma','host','grupo'],nargs=1,help='Realiza una busqueda de acuerdo al criterio seleccionado')
-    grp_ot.add_argument('-i','--ip', choices=['alarma','host'],nargs=1,help='Realiza una busqueda de IP de acuerdo al criterio seleccionado')
+    grp_ot.add_argument('-b','--buscar',choices=['alarma','host','grupo'],help='Realiza una busqueda de acuerdo al criterio seleccionado')
+    grp_ot.add_argument('-i','--ip', choices=['alarma','host'], help='Realiza una busqueda de IP de acuerdo al criterio seleccionado')
     other.set_defaults(func=exec_other)
 
     #A hostgroup subcommand
@@ -264,7 +302,7 @@ def create_command():
     edit_host.set_defaults(func=exec_hostname_atrib)
 
     args = parser.parse_args()
-#    print(args)
+    #print(args)
     args.func(args)
 
 if __name__ == '__main__':

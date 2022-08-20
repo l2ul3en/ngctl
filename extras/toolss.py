@@ -165,18 +165,20 @@ def show_alarma(datos,name,host=None):
         for alarma in (x for x in datos if x.get_name() == name):
             print(alarma)
 
-def get_alarma(datos,name, host=None):
+def get_alarma(datos,name, host=None, log=True):
     """Retorna el objeto Alarma."""
     if host != None:
         for alarma in datos:
             if alarma.get_host() == host and alarma.get_name() == name:
-                logger.info(f'se obtuvo la alarma {name} en {host}', extra=cons.EXTRA)
+                if log:
+                    logger.info(f'se obtuvo la alarma {name} en {host}', extra=cons.EXTRA)
                 return alarma
         logger.error(f'no se encontro la alarma {name} en el host {host}, exit..', extra=cons.EXTRA)
     else:
         for alarma in datos:
             if alarma.get_name() == name:
-                logger.info(f'se obtuvo la alarma {name}', extra=cons.EXTRA)
+                if log:
+                    logger.info(f'se obtuvo la alarma {name}', extra=cons.EXTRA)
                 return alarma
         logger.error(f'no se encontro la alarma {name}, exit..', extra=cons.EXTRA)
     kill(254)
