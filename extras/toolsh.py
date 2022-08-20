@@ -66,13 +66,6 @@ def procesar(cad,char):
     else: val = char.join(lista)
     return [atr,val]
 
-def get_hosts(datos):
-    """Genera todos los nombres de hosts."""
-    #return [x.get_name() for x in datos if x.get_tipo() == 'define host{']
-    for x in datos:
-        if x.get_tipo() == 'define host{':
-            yield x.get_name() 
-
 def get_host(datos,host, log=True):
     """Retorna el objeto Host."""
     for i in datos:
@@ -90,10 +83,6 @@ def get_list_dato_in_host(lista,atr,dato):
 def get_list_ip_in_host(lista,atr,ip):
     """Devuelve un iterable con todos los objetos Host que tengan la ip."""
     return filter(lambda x: x.existe_atributo(atr, False) and x.get_valor(atr) == ip,lista)
-
-def get_list_contact_in_host(lista,host):
-    """Devuelve un iterable con todos los objetos Host que tengan el atributo contacts y dato."""
-    return filter(lambda x: x.get_name() == host and x.existe_atributo('contacts',False),lista)
 
 def delete_host(datos,host):
     """Elimina las alarmas asociadas al host inidicado."""

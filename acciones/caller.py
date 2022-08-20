@@ -246,15 +246,6 @@ def eliminar_host(lalarmas, lhosts, lgrupos, host):
     else: logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
     logger.info('finalizando eliminar_host', extra=cons.EXTRA)
 
-def mostrar_listado_admins(lista,archivo):
-    logger.info('iniciando mostrar_listado_admins', extra=cons.EXTRA)
-    for host in archivo:
-        host = host.strip()
-        if host != '':
-            for k in thos.get_list_contact_in_host(lista,host):
-                print(k.eval_espacios(k.get_name(),k.get_valor('contacts')))
-    logger.info('finalizando mostrar_listado_admins', extra=cons.EXTRA)
-
 def mostrar_host(lista, host):
     logger.info('iniciando mostrar_host', extra=cons.EXTRA)
     if thos.existe_host(lista, host):
@@ -488,7 +479,7 @@ def search_regexp(lista, regex):
     logger.info('iniciando search_regexp', extra=cons.EXTRA)
     filtro = re.compile(fr'{regex}')
     out = [x.get_name() for x in lista if filtro.search(x.get_name())]
-    logger.info(f'se encontraron {len(out)} coincidencias para el patron {filtro.pattern}', extra=cons.EXTRA)
+    logger.info(f'se encontraron {len(out)} coincidencias para el patron {filtro.pattern!r}', extra=cons.EXTRA)
     for i in out:
         print(i)
     logger.info('finalizando search_regexp', extra=cons.EXTRA)
@@ -538,5 +529,3 @@ if __name__ == '__main__':
 
     l = cargar_hostgroups()
     mostrar_listado_hostgroup(l,'NVR_PARAGU')
-    #reporte_host(l,'CAMBIADO')
-    #logger.info('creado en test')
