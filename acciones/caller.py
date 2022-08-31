@@ -15,6 +15,7 @@ import ngctl.config.constantes as cons
 import ngctl.extras.toolss as tser
 import ngctl.extras.toolsh as thos
 import ngctl.extras.toolsg as thgr
+import ngctl.extras.toolsCommand as tcmd
 import ngctl.clases.Body
 import ngctl.clases.Alarma
 import logging, logging.config, re, csv
@@ -524,6 +525,119 @@ def generar_reporte(lista, file_in, file_out, separador_out=',', *atributos):
             del data_row
     logger.info(f'Se exportaron {len(lista)} registros a {getattr(file_out, "name")}', extra=cons.EXTRA)
     logger.info('finalizando generar_reporte', extra=cons.EXTRA)
+
+#Funciones para commands
+
+def cargar_commands():
+    return tcmd.cargar()
+
+def mostrar_command(lista, command):
+    logger.info('iniciando mostrar_command', extra=cons.EXTRA)
+    if tcmd.existe_command(lista, command):
+        tcmd.show_command(lista,command)
+        logger.info(f'se visualizo {command}', extra=cons.EXTRA)
+    else: logger.warning(f'no se encontro el command {command} definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_command', extra=cons.EXTRA)
+
+def eliminar_command(lista_commands, command):
+    logger.info('iniciando eliminar_command', extra=cons.EXTRA)
+    if tcmd.existe_command(lista_commands, command):
+        tcmd.delete_command(lista_commands, command)
+        tcmd.aplicar_cambios(lista_commands)
+    else: logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    logger.info('finalizando elimanr_command', extra=cons.EXTRA)
+
+def copiar_command(lista_commands, command, new):
+    logger.info('iniciando copiar_command', extra=cons.EXTRA)
+    if tcmd.existe_command(lista_commands, command):
+        if not tcmd.existe_command(lista_commands, new):
+            tcmd.copy_command(lista_commands, command, new)
+            tcmd.aplicar_cambios(lista_commands)
+        else: logger.warning(f'el command {new} ya existe en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else: logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    logger.info('finalizando copiar_command', extra=cons.EXTRA)
+
+#def renombrar_command(lista_commands, command, new):
+#    modificar_atributo_command(lista_commands, command, 'command_name', new)
+
+def modificar_atributo_command(lista_commands, name, atributo, new):
+    logger.info('iniciando modificar_atributo_command', extra=cons.EXTRA)
+    if not tcmd.existe_command(lista_commands, name):
+        logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else:
+        command = tcmd.get_command(lista_commands, name)
+        if command.existe_atributo(atributo):
+            command.add_valor(atributo,new)
+            tcmd.aplicar_cambios(lista_commands)
+        else: logger.warning(f'no existe el command {name}', extra=cons.EXTRA)
+    logger.info('finalizando modificar_atributo_command', extra=cons.EXTRA)
+
+def eliminar_atributo_command(lista_commands, name, atributo):
+    logger.info('iniciando eliminar_atributo_command', extra=cons.EXTRA)
+    if not tcmd.existe_command(lista_commands, name):
+        logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else:
+        command = tcmd.get_command(lista_commands, name)
+        if command.existe_atributo(atributo):
+            command.del_parametro(atributo)
+            tcmd.aplicar_cambios(lista_commands)
+        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_atributo_command', extra=cons.EXTRA)
+
+def mostrar_atributo_command(lista_commands, name, atributo):
+    logger.info('iniciando mostrar_atributo_command', extra=cons.EXTRA)
+    if not tcmd.existe_command(lista_commands, name):
+        logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else:
+        command = tcmd.get_command(lista_commands, name)
+        if command.existe_atributo(atributo):
+            print(command.get_valor(atributo))
+        else: logger.warning(f'no existe el command {name}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_atributo_command', extra=cons.EXTRA)
+
+def eliminar_elemento_command(lista_commands, name, atributo, dato): #solo se puede eliminar un elem a la vez
+    logger.info('iniciando eliminar_elemento_command', extra=cons.EXTRA)
+    if not tcmd.existe_command(lista_commands, name):
+        logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else:
+        command = tcmd.get_command(lista_commands, name)
+        if command.existe_atributo(atributo):
+            if command.existe_elemento(atributo, dato):
+                command.del_elemento(atributo, dato)
+                tcmd.aplicar_cambios(lista_commands)
+            else: logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
+        else: logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_elemento_command', extra=cons.EXTRA)
+
+def agregar_elemento_command(lista_commands, name, atributo, dato): #puede add varios elems separados x , Ej w,c,r
+    logger.info('iniciando agregar_elemento_command', extra=cons.EXTRA)
+    if not tcmd.existe_command(lista_commands, name):
+        logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else:
+        command = tcmd.get_command(lista_commands, name)
+        if command.existe_atributo(atributo):
+            if not command.existe_elemento(atributo, dato):
+                command.add_elemento(atributo, dato)
+                tcmd.aplicar_cambios(lista_commands)
+            else: logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+        else:
+            command.add_parametro([atributo, dato])
+            logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
+            tcmd.aplicar_cambios(lista_commands)
+    logger.info('finalizando agregar_elemento_command', extra=cons.EXTRA)
+
+def agregar_parametro_command(lista_commands, name, atributo, valor):
+    logger.info('iniciando agregar_parametro_command', extra=cons.EXTRA)
+    if not tcmd.existe_command(lista_commands, name):
+        logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else:
+        command = tcmd.get_command(lista_commands, name)
+        if not command.existe_atributo(atributo):
+            command.add_parametro([atributo,valor])
+            logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
+            tcmd.aplicar_cambios(lista_commands)
+        else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+    logger.info('finalizando agregar_parametro_command', extra=cons.EXTRA)
 
 if __name__ == '__main__':
 

@@ -21,9 +21,11 @@ logger = logging.getLogger (__name__)
 lista_alarmas = call.cargar_alarmas()
 lista_hosts = call.cargar_hosts()
 lista_grupos = call.cargar_hostgroups()
+lista_commands = call.cargar_commands()
 lista_alarmas.sort()
 lista_hosts.sort()
 lista_grupos.sort()
+lista_commands.sort()
 
 def validar_formato_ip(ip):
     aux = [int(i) for i in ip.split('.')]
@@ -38,7 +40,9 @@ def validar_longitud_sep(sep):
     return sep
 
 def status(name):
-    logger.info(f'{name} [alarmas/hosts/grupos] [{call.get_cantidad_alarmas(lista_alarmas)}/{call.get_cantidad_hosts(lista_hosts)}/{len(lista_grupos)}]', extra=cons.EXTRA)
+    logger.info(f'{name} [alarmas/hosts/grupos/commands] [\
+{call.get_cantidad_alarmas(lista_alarmas)}/{call.get_cantidad_hosts(lista_hosts)}/{len(lista_grupos)}/{len(lista_commands)}\
+]', extra=cons.EXTRA)
 
 def exec_servicio(args):
     status(exec_servicio.__name__)
@@ -137,6 +141,37 @@ def exec_hostgroup_atrib(args):
         call.agregar_parametro_grupo(lista_grupos, args.hostgroup_name, args.atributo, args.new)
     else: edit_hgroup.print_usage()
     status(exec_hostgroup_atrib.__name__)
+
+def exec_command(args):
+    status(exec_command.__name__)
+    if args.show:
+        call.mostrar_command(lista_commands, args.command_name)
+    elif args.delete:
+        call.eliminar_command(lista_commands, args.command_name)
+    elif args.copy != None:
+        call.copiar_command(lista_commands, args.command_name, args.copy)
+    elif args.rename != None:
+        call.modificar_atributo_command(lista_commands, args.command_name, cons.ID_CMD, args.rename)
+    else: cmmd.print_usage()
+    status(exec_command.__name__)
+
+def exec_command_atrib(args):
+    status(exec_command_atrib.__name__)
+    if args.delete:
+        call.eliminar_atributo_command(lista_commands, args.command_name, args.atributo)
+    elif args.get:
+        call.mostrar_atributo_command(lista_commands, args.command_name, args.atributo)
+    elif args.modify != None:
+        call.modificar_atributo_command(lista_commands, args.command_name, args.atributo, args.modify)
+    elif args.del_elemento != None:
+        call.eliminar_elemento_command(lista_commands, args.command_name, args.atributo, args.del_elemento)
+    elif args.add_elemento != None:
+        call.agregar_elemento_command(lista_commands, args.command_name, args.atributo, args.add_elemento)
+    elif args.new != None:
+        call.agregar_parametro_command(lista_commands, args.command_name, args.atributo, args.new)
+    else: edit_cmd.print_usage()
+    status(exec_command_atrib.__name__)
+
 
 def exec_other(args):
     status(exec_other.__name__)
@@ -290,6 +325,32 @@ def create_command():
     group_edit_host.add_argument('-n','--new',metavar='VALOR',help='agrega VALOR a ATRIBUTO ' )
     group_edit_host.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en ATRIBUTO')
     edit_host.set_defaults(func=exec_hostname_atrib)
+
+    #A command subcommand
+    global cmmd 
+    cmmd = subparsers.add_parser('command', aliases='c', help='Procesamiento a nivel de command')
+    cmmd.add_argument('command_name', action='store', help='nombre de command')
+    group_cmd = cmmd.add_mutually_exclusive_group()
+    group_cmd.add_argument('-c','--copy', metavar='NEW_COMMAND', action='store', help='copia command_name para NEW_COMMAND')
+    group_cmd.add_argument('-d', '--delete', action='store_true', default=False, help='elimina command_name')
+#    group_hgr.add_argument('-l','--list',action='store_true',default=False,dest='lista_host',help='muestra una lista de hosts asociados a hostgroup_name')
+    group_cmd.add_argument('-r', '--rename', metavar='NEW_COMMAND_NAME', action='store', help='cambia el nombre de command_name con NEW_COMMAND_NAME')
+    group_cmd.add_argument('-s', '--show', action='store_true', default=False, help='muestra la configuracion de command_name')
+    cmmd.set_defaults(func=exec_command)
+
+    #An edit command subcomand
+    sub_cmmd = cmmd.add_subparsers()
+    global edit_cmd
+    edit_cmd = sub_cmmd.add_parser('edit', aliases='e', help='Procesamiento a nivel de atributo')
+    edit_cmd.add_argument('atributo',help=f'nombre del atributo {cons.ID_CMD}')
+    group_edit_cmd = edit_cmd.add_mutually_exclusive_group()
+    group_edit_cmd.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade a ELEMENTO en atributo; si no existe el ATRIBUTO lo agrega')
+    group_edit_cmd.add_argument('-d', '--delete', action='store_true',default=False,help='elimina atributo')
+    group_edit_cmd.add_argument('-g', '--get', action='store_true',default=False,help='muestra el VALOR del ATRIBUTO')
+    group_edit_cmd.add_argument('-m','--modify',metavar='VALOR',help='asigna VALOR a atributo')
+    group_edit_cmd.add_argument('-n','--new',metavar='VALOR',help='agrega VALOR a atributo')
+    group_edit_cmd.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en atributo')
+    edit_cmd.set_defaults(func=exec_command_atrib)
 
     args = parser.parse_args()
     #print(args)
