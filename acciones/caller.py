@@ -18,6 +18,9 @@ import ngctl.extras.toolsg as thgr
 import ngctl.extras.toolsCommand as tcmd
 import ngctl.extras.toolsContact as tcnt
 import ngctl.extras.toolsContactGroup as tcgr
+import ngctl.clases.Alarma #necesario para exportar
+import ngctl.clases.Host
+import ngctl.clases.Hostgroup
 import logging, logging.config, re, csv
 from subprocess import getoutput as geto
 
