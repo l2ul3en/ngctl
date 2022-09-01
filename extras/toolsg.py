@@ -1,18 +1,11 @@
 #!/usr/bin/python3
 #-------------------------------------------------------------------------------
-# Name:        toolsg.py
 # Purpose:     Funciones para procesamiento a nivel de hostgroups.cfg 
-#
-# Author:      Personal
-#
-# Created:     13/09/2020
-# Copyright:   (c) Personal 2020
-# Licence:     <your licence>
 #-------------------------------------------------------------------------------
 from sys import path
 path.append('../../')
 import ngctl.config.constantes as cons
-from ngctl.clases.Body import Body
+#from ngctl.clases.Body import Body
 from ngctl.clases.Hostgroup import Hostgroup
 from subprocess import getoutput as geto
 from copy import deepcopy as copiar #permite copiar un objeto
@@ -50,11 +43,11 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
                 hostgroup = Hostgroup()
             else:
                 if ',' in i:
-                    hostgroup.add_parametro(procesar(i,','))
+                    hostgroup.add_parametro(_procesar(i,','))
                 else: hostgroup.add_parametro(i.split(maxsplit=1))
     return lista_group
 
-def procesar(cad,char):
+def _procesar(cad,char):
     atr = cad.split(maxsplit=1)[0]
     lista = cad.split(maxsplit=1)[1].split(char)
     lista = [i.strip() for i in lista if i != '']
@@ -107,7 +100,7 @@ def copy_hostgroup(datos,old,new):
         if datos[i].get_name() == old:
             hostgroup = copiar(datos[i])
             datos.append(hostgroup)
-            datos[-1].add_valor('hostgroup_name',new)
+            datos[-1].add_valor(cons.ID_HGR, new)
             datos[-1].add_valor('alias',new)
             logger.info(f'se copio {old} a {new} en {cons.ORIG_HGR}', extra=cons.EXTRA)
 
@@ -118,10 +111,5 @@ def existe_hostgroup(datos,hostgroup):
             return True
     return False
 
-
 if __name__ == '__main__':
-    l = cargar()
-    l.sort()
-    #for i in get_hostgroups(l):
-    for i in l:
-        print(i.get_name())
+    pass

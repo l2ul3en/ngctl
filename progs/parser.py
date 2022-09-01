@@ -283,7 +283,7 @@ def exec_export(args):
 
 def create_command():
     global parser
-    parser = argparse.ArgumentParser(description='nagiosctl es usado para configurar services/hosts/hostgroups .cfg, es capaz de procesar una alarma o un conjunto de alarmas definidas para un host')
+    parser = argparse.ArgumentParser(description='nagiosctl es usado para procesar objetos de configuracion nagios de manera modular.')
     subparsers = parser.add_subparsers()
 
     #An export subcommand
@@ -308,20 +308,20 @@ def create_command():
     #A hostgroup subcommand
     global hgroup 
     hgroup = subparsers.add_parser('group', aliases='g', help='Procesamiento a nivel de hostgroup')
-    hgroup.add_argument('hostgroup_name', action='store',help='nombre de hostgroup')
+    hgroup.add_argument(cons.ID_HGR, action='store',help='nombre de grupo')
     group_hgr = hgroup.add_mutually_exclusive_group()
-    group_hgr.add_argument('-c','--copy',metavar='NEW_HOSTGROUP',action='store',help='copia hostgroup_name para NEW_HOSTGROUP')
-    group_hgr.add_argument('-d', '--delete', action='store_true',default=False,help='elimina a hostgroup_name')
-    group_hgr.add_argument('-l','--list',action='store_true',default=False,dest='lista_host',help='muestra una lista de hosts asociados a hostgroup_name')
-    group_hgr.add_argument('-r', '--rename',metavar='NEW_HOSTGROUP_NAME', action='store',help='cambia el nombre de hostgroup_name con NEW_HOSTGROUP_NAME')
-    group_hgr.add_argument('-s', '--show', action='store_true',default=False,help='muestra la configuracion de hostgroup_name')
+    group_hgr.add_argument('-c','--copy',metavar=f'NEW_{cons.ID_HGR.upper()}',action='store',help=f'copia {cons.ID_HGR} para NEW_{cons.ID_HGR.upper()}')
+    group_hgr.add_argument('-d', '--delete', action='store_true',default=False,help=f'elimina {cons.ID_HGR}')
+    group_hgr.add_argument('-l','--list',action='store_true',default=False,dest='lista_host',help=f'muestra una lista de hosts asociados a {cons.ID_HGR}')
+    group_hgr.add_argument('-r', '--rename',metavar=f'NEW_{cons.ID_HGR.upper()}', action='store',help=f'cambia {cons.ID_HGR} con NEW_{cons.ID_HGR.upper()}')
+    group_hgr.add_argument('-s', '--show', action='store_true',default=False,help=f'muestra la configuracion de {cons.ID_HGR}')
     hgroup.set_defaults(func=exec_hostgroup)
 
     #An edit hostgroup subcomand
     sub_hgroup = hgroup.add_subparsers()
     global edit_hgroup
     edit_hgroup = sub_hgroup.add_parser('edit', aliases='e', help='Procesamiento a nivel de atributo')
-    edit_hgroup.add_argument('atributo',help='nombre del atributo de hostgroup_name')
+    edit_hgroup.add_argument('atributo',help=f'nombre del atributo de {cons.ID_HGR}')
     group_edit_hgroup = edit_hgroup.add_mutually_exclusive_group()
     group_edit_hgroup.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade a ELEMENTO en atributo; si no existe el ATRIBUTO lo agrega')
     group_edit_hgroup.add_argument('-d', '--delete', action='store_true',default=False,help='elimina atributo')
@@ -331,16 +331,16 @@ def create_command():
     group_edit_hgroup.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en atributo')
     edit_hgroup.set_defaults(func=exec_hostgroup_atrib)
 
-    # An alarm subcommand
+    # A service subcommand
     global alarma
     alarma = subparsers.add_parser('service', aliases='s', help='Procesamiento a nivel de servicio')
-    alarma.add_argument('service_name',help='nombre de la alarma')
+    alarma.add_argument(cons.ID_SRV,help='nombre de alarma')
     group_alarma = alarma.add_mutually_exclusive_group()
     group_opc = alarma.add_mutually_exclusive_group()
     group_alarma.add_argument('-c','--copy',metavar='NEW_HOST',help='copia service_name para NEW_HOST')
-    group_alarma.add_argument('-d', '--delete', action='store_true',default=False,help='elimina a service_name')
-    group_alarma.add_argument('-r', '--rename',metavar='NEW_NAME',help='cambia el nombre de service_name con NEW_NAME')
-    group_alarma.add_argument('-s', '--show', action='store_true',default=False,help='muestra la configuracion de service_name')
+    group_alarma.add_argument('-d', '--delete', action='store_true',default=False,help=f'elimina {cons.ID_SRV}')
+    group_alarma.add_argument('-r', '--rename',metavar=f'NEW_{cons.ID_SRV.upper()}',help=f'cambia {cons.ID_SRV} con NEW_{cons.ID_SRV.upper()}')
+    group_alarma.add_argument('-s', '--show', action='store_true',default=False,help=f'muestra la configuracion de {cons.ID_SRV}')
     group_opc.add_argument('--host',help='especifica HOST para una busqueda mas precisa')
     alarma.set_defaults(func=exec_servicio)
 
@@ -348,7 +348,7 @@ def create_command():
     sub_service = alarma.add_subparsers()
     global edit_alarm
     edit_alarm = sub_service.add_parser('edit', aliases='e', help='Procesamiento a nivel de atributo')
-    edit_alarm.add_argument('atributo',help='nombre del atributo de service_name')
+    edit_alarm.add_argument('atributo',help=f'nombre del atributo de {cons.ID_SRV}')
     group_edit_alarm = edit_alarm.add_mutually_exclusive_group()
     group_edit_alarm.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade a ELEMENTO en ATRIBUTO; si no existe el ATRIBUTO lo agrega')
     group_edit_alarm.add_argument('-d', '--delete',action='store_true',default=False,help='elimina ATRIBUTO')
@@ -361,16 +361,16 @@ def create_command():
     # A hostname subcommand
     global host
     host = subparsers.add_parser('hostname', aliases='h', help='Procesamiento a nivel de host')
-    host.add_argument('host_name', action='store',help='nombre de host')
+    host.add_argument(cons.ID_HST, action='store',help='nombre de host')
     group_opc = host.add_mutually_exclusive_group()
     group_host = host.add_mutually_exclusive_group()
-    group_opc.add_argument('-l','--list',action='store_true',default=False,dest='lista_alarm',help='muestra una lista de alarmas asociadas a host_name')
-    group_host.add_argument('-c','--copy',metavar='NEW_HOST',action='store',help='copia las alarmas de host_name para NEW_HOST')
-    group_host.add_argument('-d','--delete',action='store_true',default=False,help='elimina host_name y alarmas; desvincula de grupos')
-    group_host.add_argument('-g', '--generate',action='store_true',default=False,help='genera breve reporte # de alarmas de host_name')
-    group_host.add_argument('-G', '--groups',action='store_true',default=False,help='muestra los grupos asociados a host_name')
-    group_host.add_argument('-r', '--rename',metavar='NEW_NAME', action='store',help='cambia el nombre de host_name con NEW_NAME; actualiza grupos y alarmas')
-    group_host.add_argument('-s', '--show', action='store_true',default=False,help='muestra la configuracion de host_name')
+    group_opc.add_argument('-l','--list',action='store_true',default=False,dest='lista_alarm',help=f'muestra una lista de alarmas asociadas a {cons.ID_HST}')
+    group_host.add_argument('-c','--copy',metavar=f'NEW_{cons.ID_HST.upper()}',action='store',help=f'copia las alarmas de {cons.ID_HST} para NEW_{cons.ID_HST.upper()}')
+    group_host.add_argument('-d','--delete',action='store_true',default=False,help=f'elimina {cons.ID_HST} y alarmas; desvincula de grupos')
+    group_host.add_argument('-g', '--generate',action='store_true',default=False,help=f'genera breve reporte # de alarmas de {cons.ID_HST}')
+    group_host.add_argument('-G', '--groups',action='store_true',default=False,help=f'muestra los grupos asociados a {cons.ID_HST}')
+    group_host.add_argument('-r', '--rename',metavar=f'NEW_{cons.ID_HST.upper()}', action='store',help=f'cambia {cons.ID_HST} con NEW_{cons.ID_HST.upper()}; actualiza grupos y alarmas')
+    group_host.add_argument('-s', '--show', action='store_true',default=False,help=f'muestra la configuracion de {cons.ID_HST}')
     group_opc.add_argument('--ip',type=validar_formato_ip,help='especifica la nueva IP; trabaja con -c/--copy')
     group_opc.add_argument('-v', '--verbose', action='store_true',default=False,help='informe detallado')
     host.set_defaults(func=exec_hostname)
@@ -379,7 +379,7 @@ def create_command():
     sub_host = host.add_subparsers()
     global edit_host
     edit_host = sub_host.add_parser('edit', aliases='e', help='Procesamiento a nivel de atributo')
-    edit_host.add_argument('atributo',help='nombre del atributo de host_name')
+    edit_host.add_argument('atributo',help=f'nombre del atributo de {cons.ID_HST}')
     group_edit_host = edit_host.add_mutually_exclusive_group()
     group_edit_host.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade ELEMENTO en ATRIBUTO; si no existe el ATRIBUTO lo agrega')
     group_edit_host.add_argument('-d', '--delete', action='store_true',default=False,help='elimina ATRIBUTO VALOR')
@@ -396,7 +396,7 @@ def create_command():
     group_cmd = cmmd.add_mutually_exclusive_group()
     group_cmd.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_CMD.upper()}', action='store', help=f'copia {cons.ID_CMD} para NEW_{cons.ID_CMD.upper()}')
     group_cmd.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CMD}')
-    group_cmd.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CMD.upper()}', action='store', help=f'cambia el nombre de {cons.ID_CMD} con NEW_{cons.ID_CMD.upper()}')
+    group_cmd.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CMD.upper()}', action='store', help=f'cambia {cons.ID_CMD} con NEW_{cons.ID_CMD.upper()}')
     group_cmd.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_CMD}')
     cmmd.set_defaults(func=exec_command)
 
@@ -421,7 +421,7 @@ def create_command():
     group_cnt = cnts.add_mutually_exclusive_group()
     group_cnt.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_CNT.upper()}', action='store', help=f'copia {cons.ID_CNT} para NEW_{cons.ID_CNT.upper()}')
     group_cnt.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CNT}')
-    group_cnt.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CNT.upper()}', action='store', help=f'cambia el nombre de {cons.ID_CNT} con NEW_{cons.ID_CNT.upper()}')
+    group_cnt.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CNT.upper()}', action='store', help=f'cambia {cons.ID_CNT} con NEW_{cons.ID_CNT.upper()}')
     group_cnt.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_CNT}')
     cnts.set_defaults(func=exec_contact)
 
@@ -439,14 +439,14 @@ def create_command():
     group_edit_cnt.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en atributo')
     edit_cnt.set_defaults(func=exec_contact_atrib)
 
-    #A contactgroup subcommand#####
+    #A contactgroup subcommand
     global cgrp 
     cgrp = subparsers.add_parser('contactgroup', aliases='C', help='Procesamiento a nivel de contactgroup')
     cgrp.add_argument(cons.ID_CGR, action='store', help='nombre de contactgroup')
     group_cgr = cgrp.add_mutually_exclusive_group()
     group_cgr.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_CGR.upper()}', action='store', help=f'copia {cons.ID_CGR} para NEW_{cons.ID_CGR.upper()}')
     group_cgr.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CGR}')
-    group_cgr.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CGR.upper()}', action='store', help=f'cambia el nombre de {cons.ID_CGR} con NEW_{cons.ID_CGR.upper()}')
+    group_cgr.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CGR.upper()}', action='store', help=f'cambia {cons.ID_CGR} con NEW_{cons.ID_CGR.upper()}')
     group_cgr.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_CGR}')
     cgrp.set_defaults(func=exec_contactgroup)
 

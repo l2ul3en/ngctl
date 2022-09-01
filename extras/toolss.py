@@ -1,19 +1,12 @@
 #!/usr/bin/python3
 #-------------------------------------------------------------------------------
-# Name:        toolss
 # Purpose:     Funciones para procesamiento a nivel alarma (services.cfg)
-#
-# Author:      Personal
-#
-# Created:     13/09/2020
-# Copyright:   (c) Personal 2020
-# Licence:     <your licence>
 #-------------------------------------------------------------------------------
 from sys import path, exit as kill
 path.append('../../')
 import ngctl.config.constantes as cons
 from ngctl.clases.Alarma import Alarma
-from ngctl.clases.Body import Body
+#from ngctl.clases.Body import Body
 from subprocess import getoutput as geto
 from copy import deepcopy as copiar #permite copiar un objeto
 import logging,logging.config,re
@@ -49,11 +42,11 @@ def cargar():
                 alarma = Alarma()
             else:
                 if ',' in i and not i.startswith('check_command'):
-                    alarma.add_parametro(procesar(i,','))
+                    alarma.add_parametro(_procesar(i,','))
                 else: alarma.add_parametro(i.split(maxsplit=1))
     return lista_alarmas
 
-def procesar(cad,char):
+def _procesar(cad,char):
     atr = cad.split(maxsplit=1)[0]
     lista = cad.split(maxsplit=1)[1].split(char)
     lista = [i.strip() for i in lista if i != '']
@@ -117,8 +110,8 @@ def copy_host(datos,old,new,ip, ip_old):
         if datos[i].get_host() == old and datos[i].get_tipo() == 'define service{':
             alarma = copiar(datos[i])
             datos.append(alarma)
-            datos[-1].add_valor('service_description',datos[-1].get_name().replace(old,new))
-            datos[-1].add_valor('host_name',new)
+            datos[-1].add_valor(cons.ID_SRV, datos[-1].get_name().replace(old,new))
+            datos[-1].add_valor(cons.ID_HST, new)
             value=''
             lista = datos[-1].get_valor('check_command').split('!')
             b = False
@@ -140,8 +133,8 @@ def copy_alarma(datos,old,new,host=None):
                 copia = copiar(datos[i])
                 datos.append(copia)
                 name = datos[-1].get_name().replace(datos[-1].get_host(),new)
-                datos[-1].add_valor('service_description',name)
-                datos[-1].add_valor('host_name',new)
+                datos[-1].add_valor(cons.ID_SRV, name)
+                datos[-1].add_valor(cons.ID_HST, new)
                 logger.info(f'se copio correctamente {old}/{host} a {name}', extra=cons.EXTRA)
     else:
         for i in range(len(datos)):
@@ -149,8 +142,8 @@ def copy_alarma(datos,old,new,host=None):
                 copia = copiar(datos[i])
                 datos.append(copia)
                 name = datos[-1].get_name().replace(datos[-1].get_host(),new)
-                datos[-1].add_valor('service_description',name)
-                datos[-1].add_valor('host_name',new)
+                datos[-1].add_valor(cons.ID_SRV, name)
+                datos[-1].add_valor(cons.ID_HST, new)
                 logger.info(f'se copio correctamente {old} a {name}', extra=cons.EXTRA)
 
 def existe_alarma(datos,name, host=None):
@@ -204,8 +197,8 @@ def rename_host(datos, host, new):
     for i in range(len(datos)):
         if datos[i].get_host() == host and datos[i].get_tipo() == 'define service{':
             srv = datos[i].get_name().replace(host,new)
-            datos[i].add_valor('service_description', srv)
-            datos[i].add_valor('host_name', new)
+            datos[i].add_valor(cons.SRV, srv)
+            datos[i].add_valor(cons.HST, new)
             logger.info(f'se renombro {host} a {new} en {cons.ORIG_SRV}', extra=cons.EXTRA)
 
 def get_cantidad(datos):
@@ -217,11 +210,4 @@ def get_cantidad(datos):
     return c
 
 if __name__ == '__main__':
-
-    l = cargar()
-    #b = [str(x.get_host()) for x in l]
-    #c = list(set(b))
-    l.sort()
-    #for i in l:
-        #if not i.existe_atributo('service_description'): 
-    show_alarma(l,'TSSAC3_PING2')
+    pass

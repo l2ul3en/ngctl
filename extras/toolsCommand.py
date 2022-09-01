@@ -1,13 +1,6 @@
 #!/usr/bin/python3
 #-------------------------------------------------------------------------------
-# Name:        toolsCommand.py
 # Purpose:     Funciones para procesamiento a nivel de commands.cfg 
-#
-# Author:      Personal
-#
-# Created:     30/08/2022
-# Copyright:   (c) Personal 2022
-# Licence:     <your licence>
 #-------------------------------------------------------------------------------
 from sys import path
 path.append('../../')
@@ -43,8 +36,8 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
             if i == '' or i.startswith(('define','#')):
                 continue
             elif i.startswith('}'):
-                command.ordenar(rev=True)
-                if command.existe_atributo('command_name',log=False):
+                command.ordenar()
+                if command.existe_atributo(cons.ID_CMD, log=False):
                     lista_command.append(command)
                 command = Command()
             else:
@@ -94,7 +87,7 @@ def copy_command(datos,old,new):
         if datos[i].get_name() == old:
             command = copiar(datos[i])
             datos.append(command)
-            datos[-1].add_valor('command_name',new)
+            datos[-1].add_valor(cons.ID_CMD, new)
             logger.info(f'se copio {old} a {new} en {cons.ORIG_CMD}', extra=cons.EXTRA)
 
 def existe_command(datos,command):

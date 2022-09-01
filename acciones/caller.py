@@ -31,7 +31,7 @@ def get_cantidad_alarmas(datos):
     return tser.get_cantidad(datos)
 
 def renombrar_servicio(lalarmas, old, new, host=None):
-    modificar_atributo(lalarmas, old, 'service_description', new, host)
+    modificar_atributo(lalarmas, old, cons.ID_SRV, new, host)
   
 def modificar_atributo(lista, key, atributo, new, host=None):
     logger.info('iniciando modificar_atributo', extra=cons.EXTRA)
@@ -380,7 +380,7 @@ def eliminar_hostgroup(lhostgroups, grupo):
     logger.info('finalizando eliminar_hostgroup', extra=cons.EXTRA)
 
 def renombrar_hostgroup(lhostgroups, grupo, new):
-    modificar_atributo_grupo(lhostgroups, grupo, 'hostgroup_name', new)
+    modificar_atributo_grupo(lhostgroups, grupo, cons.ID_HGR, new)
 
 def mostrar_listado_hosts(lhostgroups, grupo):
     logger.info('iniciando mostrar_listado_hosts', extra=cons.EXTRA)

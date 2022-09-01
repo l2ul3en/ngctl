@@ -37,7 +37,7 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
                 continue
             elif i.startswith('}'):
                 contactgroup.ordenar()
-                if contactgroup.existe_atributo('contactgroup_name',log=False):
+                if contactgroup.existe_atributo(cons.ID_CGR,log=False):
                     lista_contactgroup.append(contactgroup)
                 contactgroup = ContactGroup()
             else:
@@ -87,7 +87,7 @@ def copy_contactgroup(datos,old,new):
         if datos[i].get_name() == old:
             contactgroup = copiar(datos[i])
             datos.append(contactgroup)
-            datos[-1].add_valor('contactgroup_name',new)
+            datos[-1].add_valor(cons.ID_CGR,new)
             logger.info(f'se copio {old} a {new} en {cons.ORIG_CGR}', extra=cons.EXTRA)
 
 def existe_contactgroup(datos,contactgroup):

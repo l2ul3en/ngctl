@@ -1,18 +1,11 @@
 #!/usr/bin/python3
 #-------------------------------------------------------------------------------
-# Name:        toolsh
 # Purpose:     Funciones para procesamiento a nivel de hosts.cfg 
-#
-# Author:      Personal
-#
-# Created:     13/09/2020
-# Copyright:   (c) Personal 2020
-# Licence:     <your licence>
 #-------------------------------------------------------------------------------
 from sys import path
 path.append('../../')
 import ngctl.config.constantes as cons
-from ngctl.clases.Body import Body
+#from ngctl.clases.Body import Body
 from ngctl.clases.Host import Host
 from subprocess import getoutput as geto
 from copy import deepcopy as copiar #permite copiar un objeto
@@ -52,11 +45,11 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
                 host = Host()
             else:
                 if ',' in i:
-                    host.add_parametro(procesar(i,','))
+                    host.add_parametro(_procesar(i,','))
                 else: host.add_parametro(i.split(maxsplit=1))
     return lista_hosts
 
-def procesar(cad,char):
+def _procesar(cad,char):
     atr = cad.split(maxsplit=1)[0]
     lista = cad.split(maxsplit=1)[1].split(char)
     lista = [i.strip() for i in lista if i != '']
@@ -105,7 +98,7 @@ def copy_host(datos,old,new,ip=None):
         if datos[i].get_name() == old and datos[i].get_tipo() == 'define host{':
             host = copiar(datos[i])
             datos.append(host)
-            datos[-1].add_valor('host_name',new)
+            datos[-1].add_valor(cons.ID_HST, new)
             datos[-1].add_valor('alias',new)
             if ip != None:
                 datos[-1].add_valor('address',ip)
@@ -122,7 +115,7 @@ def rename_host(datos, host, new):
     for i in range(len(datos)):
         if datos[i].get_name() == host and datos[i].get_tipo() == 'define host{':
 #           datos[i].add_name(new)
-            datos[i].add_valor('host_name',new)
+            datos[i].add_valor(cons.ID_HST, new)
             datos[i].add_valor('alias',new)
             logger.info(f'se actualizo el nombre de {host} a {new} en {cons.ORIG_HST}', extra=cons.EXTRA)
 
@@ -135,8 +128,4 @@ def get_cantidad(datos):
     return c
 
 if __name__ == '__main__':
-    l = cargar()
-    l.sort()
-    #for i in get_list_contact_in_host(l,'TBB'):
-            #print('host:',i.get_name(),'admin: ',i.get_valor('contacts'))
-
+    pass
