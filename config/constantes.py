@@ -23,24 +23,28 @@ ORIG_SRV = 'services.cfg'
 ORIG_HST = 'hosts.cfg'
 ORIG_HGR = 'hostgroups.cfg'
 ORIG_CMD = 'commands.cfg'
+ORIG_CNT = 'contacts.cfg'
 
 #2. Archivos de respaldo de configuracion nagios
 BACK_SRV = f'{DIR_BK}{ORIG_SRV}.bk'
 BACK_HST = f'{DIR_BK}{ORIG_HST}.bk'
 BACK_HGR = f'{DIR_BK}{ORIG_HGR}.bk'
 BACK_CMD = f'{DIR_BK}{ORIG_CMD}.bk'
+BACK_CNT = f'{DIR_BK}{ORIG_CNT}.bk'
 
 #3. Archivo temporal para escribir los cambios
 TMP_SRV = f'{DIR_TMP}{ORIG_SRV}.tmp' 
 TMP_HST = f'{DIR_TMP}{ORIG_HST}.tmp' 
 TMP_HGR = f'{DIR_TMP}{ORIG_HGR}.tmp' 
 TMP_CMD = f'{DIR_TMP}{ORIG_CMD}.tmp' 
+TMP_CNT = f'{DIR_TMP}{ORIG_CNT}.tmp' 
 
 #4. Atributo identificador de objetos nagios
 ID_SRV = 'service_description'
 ID_HST = 'host_name'
 ID_HGR = 'hostgroup_name'
 ID_CMD = 'command_name'
+ID_CNT = 'contact_name'
 
 if __name__ == '__main__':
     pass

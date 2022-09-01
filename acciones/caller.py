@@ -16,8 +16,9 @@ import ngctl.extras.toolss as tser
 import ngctl.extras.toolsh as thos
 import ngctl.extras.toolsg as thgr
 import ngctl.extras.toolsCommand as tcmd
-import ngctl.clases.Body
-import ngctl.clases.Alarma
+import ngctl.extras.toolsContact as tcnt
+#import ngctl.clases.Body
+#import ngctl.clases.Alarma
 import logging, logging.config, re, csv
 from subprocess import getoutput as geto
 
@@ -545,7 +546,7 @@ def eliminar_command(lista_commands, command):
         tcmd.delete_command(lista_commands, command)
         tcmd.aplicar_cambios(lista_commands)
     else: logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
-    logger.info('finalizando elimanr_command', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_command', extra=cons.EXTRA)
 
 def copiar_command(lista_commands, command, new):
     logger.info('iniciando copiar_command', extra=cons.EXTRA)
@@ -557,9 +558,6 @@ def copiar_command(lista_commands, command, new):
     else: logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
     logger.info('finalizando copiar_command', extra=cons.EXTRA)
 
-#def renombrar_command(lista_commands, command, new):
-#    modificar_atributo_command(lista_commands, command, 'command_name', new)
-
 def modificar_atributo_command(lista_commands, name, atributo, new):
     logger.info('iniciando modificar_atributo_command', extra=cons.EXTRA)
     if not tcmd.existe_command(lista_commands, name):
@@ -569,7 +567,7 @@ def modificar_atributo_command(lista_commands, name, atributo, new):
         if command.existe_atributo(atributo):
             command.add_valor(atributo,new)
             tcmd.aplicar_cambios(lista_commands)
-        else: logger.warning(f'no existe el command {name}', extra=cons.EXTRA)
+        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
     logger.info('finalizando modificar_atributo_command', extra=cons.EXTRA)
 
 def eliminar_atributo_command(lista_commands, name, atributo):
@@ -638,6 +636,116 @@ def agregar_parametro_command(lista_commands, name, atributo, valor):
             tcmd.aplicar_cambios(lista_commands)
         else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
     logger.info('finalizando agregar_parametro_command', extra=cons.EXTRA)
+
+#Funciones para contacts
+
+def cargar_contacts():
+    return tcnt.cargar()
+
+def mostrar_contact(lista, contact):
+    logger.info('iniciando mostrar_contact', extra=cons.EXTRA)
+    if tcnt.existe_contact(lista, contact):
+        tcnt.show_contact(lista,contact)
+        logger.info(f'se visualizo {contact}', extra=cons.EXTRA)
+    else: logger.warning(f'no se encontro el contact {contact} definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_contact', extra=cons.EXTRA)
+
+def eliminar_contact(lista_contacts, contact):
+    logger.info('iniciando eliminar_contact', extra=cons.EXTRA)
+    if tcnt.existe_contact(lista_contacts, contact):
+        tcnt.delete_contact(lista_contacts, contact)
+        tcnt.aplicar_cambios(lista_contacts)
+    else: logger.warning(f'el contact {contact} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_contact', extra=cons.EXTRA)
+
+def copiar_contact(lista_contacts, contact, new):
+    logger.info('iniciando copiar_contact', extra=cons.EXTRA)
+    if tcnt.existe_contact(lista_contacts, contact):
+        if not tcnt.existe_contact(lista_contacts, new):
+            tcnt.copy_contact(lista_contacts, contact, new)
+            tcnt.aplicar_cambios(lista_contacts)
+        else: logger.warning(f'el contact {new} ya existe en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else: logger.warning(f'el contact {contact} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    logger.info('finalizando copiar_contact', extra=cons.EXTRA)
+
+def modificar_atributo_contact(lista_contacts, name, atributo, new):
+    logger.info('iniciando modificar_atributo_contact', extra=cons.EXTRA)
+    if not tcnt.existe_contact(lista_contacts, name):
+        logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        contact = tcnt.get_contact(lista_contacts, name)
+        if contact.existe_atributo(atributo):
+            contact.add_valor(atributo,new)
+            tcnt.aplicar_cambios(lista_contacts)
+        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+    logger.info('finalizando modificar_atributo_contact', extra=cons.EXTRA)
+
+def eliminar_atributo_contact(lista_contacts, name, atributo):
+    logger.info('iniciando eliminar_atributo_contact', extra=cons.EXTRA)
+    if not tcnt.existe_contact(lista_contacts, name):
+        logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        contact = tcnt.get_contact(lista_contacts, name)
+        if contact.existe_atributo(atributo):
+            contact.del_parametro(atributo)
+            tcnt.aplicar_cambios(lista_contacts)
+        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_atributo_contact', extra=cons.EXTRA)
+
+def mostrar_atributo_contact(lista_contacts, name, atributo):
+    logger.info('iniciando mostrar_atributo_contact', extra=cons.EXTRA)
+    if not tcnt.existe_contact(lista_contacts, name):
+        logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        contact = tcnt.get_contact(lista_contacts, name)
+        if contact.existe_atributo(atributo):
+            print(contact.get_valor(atributo))
+        else: logger.warning(f'no existe el contact {name}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_atributo_contact', extra=cons.EXTRA)
+
+def eliminar_elemento_contact(lista_contacts, name, atributo, dato): #solo se puede eliminar un elem a la vez
+    logger.info('iniciando eliminar_elemento_contact', extra=cons.EXTRA)
+    if not tcnt.existe_contact(lista_contacts, name):
+        logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        contact = tcnt.get_contact(lista_contacts, name)
+        if contact.existe_atributo(atributo):
+            if contact.existe_elemento(atributo, dato):
+                contact.del_elemento(atributo, dato)
+                tcnt.aplicar_cambios(lista_contacts)
+            else: logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
+        else: logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_elemento_contact', extra=cons.EXTRA)
+
+def agregar_elemento_contact(lista_contacts, name, atributo, dato): #puede add varios elems separados x , Ej w,c,r
+    logger.info('iniciando agregar_elemento_contact', extra=cons.EXTRA)
+    if not tcnt.existe_contact(lista_contacts, name):
+        logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        contact = tcnt.get_contact(lista_contacts, name)
+        if contact.existe_atributo(atributo):
+            if not contact.existe_elemento(atributo, dato):
+                contact.add_elemento(atributo, dato)
+                tcnt.aplicar_cambios(lista_contacts)
+            else: logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+        else:
+            contact.add_parametro([atributo, dato])
+            logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
+            tcnt.aplicar_cambios(lista_contacts)
+    logger.info('finalizando agregar_elemento_contact', extra=cons.EXTRA)
+
+def agregar_parametro_contact(lista_contacts, name, atributo, valor):
+    logger.info('iniciando agregar_parametro_contact', extra=cons.EXTRA)
+    if not tcnt.existe_contact(lista_contacts, name):
+        logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        contact = tcnt.get_contact(lista_contacts, name)
+        if not contact.existe_atributo(atributo):
+            contact.add_parametro([atributo,valor])
+            logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
+            tcnt.aplicar_cambios(lista_contacts)
+        else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+    logger.info('finalizando agregar_parametro_contact', extra=cons.EXTRA)
 
 if __name__ == '__main__':
 

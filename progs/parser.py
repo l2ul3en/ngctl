@@ -22,10 +22,12 @@ lista_alarmas = call.cargar_alarmas()
 lista_hosts = call.cargar_hosts()
 lista_grupos = call.cargar_hostgroups()
 lista_commands = call.cargar_commands()
+lista_contacts = call.cargar_contacts()
 lista_alarmas.sort()
 lista_hosts.sort()
 lista_grupos.sort()
 lista_commands.sort()
+lista_contacts.sort()
 
 def validar_formato_ip(ip):
     aux = [int(i) for i in ip.split('.')]
@@ -40,8 +42,8 @@ def validar_longitud_sep(sep):
     return sep
 
 def status(name):
-    logger.info(f'{name} [alarmas/hosts/grupos/commands] [\
-{call.get_cantidad_alarmas(lista_alarmas)}/{call.get_cantidad_hosts(lista_hosts)}/{len(lista_grupos)}/{len(lista_commands)}\
+    logger.info(f'{name} [alarmas/hosts/grupos/commands/contacts] [\
+{call.get_cantidad_alarmas(lista_alarmas)}/{call.get_cantidad_hosts(lista_hosts)}/{len(lista_grupos)}/{len(lista_commands)}/{len(lista_contacts)}\
 ]', extra=cons.EXTRA)
 
 def exec_servicio(args):
@@ -172,6 +174,35 @@ def exec_command_atrib(args):
     else: edit_cmd.print_usage()
     status(exec_command_atrib.__name__)
 
+def exec_contact(args):
+    status(exec_contact.__name__)
+    if args.show:
+        call.mostrar_contact(lista_contacts, args.contact_name)
+    elif args.delete:
+        call.eliminar_contact(lista_contacts, args.contact_name)
+    elif args.copy != None:
+        call.copiar_contact(lista_contacts, args.contact_name, args.copy)
+    elif args.rename != None:
+        call.modificar_atributo_contact(lista_contacts, args.contact_name, cons.ID_CNT, args.rename)
+    else: cnts.print_usage()
+    status(exec_contact.__name__)
+
+def exec_contact_atrib(args):
+    status(exec_contact_atrib.__name__)
+    if args.delete:
+        call.eliminar_atributo_contact(lista_contacts, args.contact_name, args.atributo)
+    elif args.get:
+        call.mostrar_atributo_contact(lista_contacts, args.contact_name, args.atributo)
+    elif args.modify != None:
+        call.modificar_atributo_contact(lista_contacts, args.contact_name, args.atributo, args.modify)
+    elif args.del_elemento != None:
+        call.eliminar_elemento_contact(lista_contacts, args.contact_name, args.atributo, args.del_elemento)
+    elif args.add_elemento != None:
+        call.agregar_elemento_contact(lista_contacts, args.contact_name, args.atributo, args.add_elemento)
+    elif args.new != None:
+        call.agregar_parametro_contact(lista_contacts, args.contact_name, args.atributo, args.new)
+    else: edit_cnt.print_usage()
+    status(exec_contact_atrib.__name__)
 
 def exec_other(args):
     status(exec_other.__name__)
@@ -328,14 +359,13 @@ def create_command():
 
     #A command subcommand
     global cmmd 
-    cmmd = subparsers.add_parser('command', aliases='c', help='Procesamiento a nivel de command')
-    cmmd.add_argument('command_name', action='store', help='nombre de command')
+    cmmd = subparsers.add_parser('command', aliases='x', help='Procesamiento a nivel de command')
+    cmmd.add_argument(cons.ID_CMD, action='store', help='nombre de command')
     group_cmd = cmmd.add_mutually_exclusive_group()
-    group_cmd.add_argument('-c','--copy', metavar='NEW_COMMAND', action='store', help='copia command_name para NEW_COMMAND')
-    group_cmd.add_argument('-d', '--delete', action='store_true', default=False, help='elimina command_name')
-#    group_hgr.add_argument('-l','--list',action='store_true',default=False,dest='lista_host',help='muestra una lista de hosts asociados a hostgroup_name')
-    group_cmd.add_argument('-r', '--rename', metavar='NEW_COMMAND_NAME', action='store', help='cambia el nombre de command_name con NEW_COMMAND_NAME')
-    group_cmd.add_argument('-s', '--show', action='store_true', default=False, help='muestra la configuracion de command_name')
+    group_cmd.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_CMD.upper()}', action='store', help=f'copia {cons.ID_CMD} para NEW_{cons.ID_CMD.upper()}')
+    group_cmd.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CMD}')
+    group_cmd.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CMD.upper()}', action='store', help=f'cambia el nombre de {cons.ID_CMD} con NEW_{cons.ID_CMD.upper()}')
+    group_cmd.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_CMD}')
     cmmd.set_defaults(func=exec_command)
 
     #An edit command subcomand
@@ -351,6 +381,31 @@ def create_command():
     group_edit_cmd.add_argument('-n','--new',metavar='VALOR',help='agrega VALOR a atributo')
     group_edit_cmd.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en atributo')
     edit_cmd.set_defaults(func=exec_command_atrib)
+
+    #A contact subcommand
+    global cnts 
+    cnts = subparsers.add_parser('contact', aliases='c', help='Procesamiento a nivel de contact')
+    cnts.add_argument(cons.ID_CNT, action='store', help='usuario')
+    group_cnt = cnts.add_mutually_exclusive_group()
+    group_cnt.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_CNT.upper()}', action='store', help=f'copia {cons.ID_CNT} para NEW_{cons.ID_CNT.upper()}')
+    group_cnt.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CNT}')
+    group_cnt.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CNT.upper()}', action='store', help=f'cambia el nombre de {cons.ID_CNT} con NEW_{cons.ID_CNT.upper()}')
+    group_cnt.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_CNT}')
+    cnts.set_defaults(func=exec_contact)
+
+    #An edit contact subcomand
+    sub_cnts = cnts.add_subparsers()
+    global edit_cnt
+    edit_cnt = sub_cnts.add_parser('edit', aliases='e', help='Procesamiento a nivel de atributo')
+    edit_cnt.add_argument('atributo',help=f'nombre del atributo {cons.ID_CNT}')
+    group_edit_cnt = edit_cnt.add_mutually_exclusive_group()
+    group_edit_cnt.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade a ELEMENTO en atributo; si no existe el ATRIBUTO lo agrega')
+    group_edit_cnt.add_argument('-d', '--delete', action='store_true',default=False,help='elimina atributo')
+    group_edit_cnt.add_argument('-g', '--get', action='store_true',default=False,help='muestra el VALOR del ATRIBUTO')
+    group_edit_cnt.add_argument('-m','--modify',metavar='VALOR',help='asigna VALOR a atributo')
+    group_edit_cnt.add_argument('-n','--new',metavar='VALOR',help='agrega VALOR a atributo')
+    group_edit_cnt.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en atributo')
+    edit_cnt.set_defaults(func=exec_contact_atrib)
 
     args = parser.parse_args()
     #print(args)
