@@ -17,8 +17,7 @@ import ngctl.extras.toolsh as thos
 import ngctl.extras.toolsg as thgr
 import ngctl.extras.toolsCommand as tcmd
 import ngctl.extras.toolsContact as tcnt
-#import ngctl.clases.Body
-#import ngctl.clases.Alarma
+import ngctl.extras.toolsContactGroup as tcgr
 import logging, logging.config, re, csv
 from subprocess import getoutput as geto
 
@@ -746,6 +745,116 @@ def agregar_parametro_contact(lista_contacts, name, atributo, valor):
             tcnt.aplicar_cambios(lista_contacts)
         else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
     logger.info('finalizando agregar_parametro_contact', extra=cons.EXTRA)
+
+#Funciones para contactgroups
+
+def cargar_contactgroups():
+    return tcgr.cargar()
+
+def mostrar_contactgroup(lista, contactgroup):
+    logger.info('iniciando mostrar_contactgroup', extra=cons.EXTRA)
+    if tcgr.existe_contactgroup(lista, contactgroup):
+        tcgr.show_contactgroup(lista,contactgroup)
+        logger.info(f'se visualizo {contactgroup}', extra=cons.EXTRA)
+    else: logger.warning(f'no se encontro el contactgroup {contactgroup} definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_contactgroup', extra=cons.EXTRA)
+
+def eliminar_contactgroup(lista_contactgroups, contactgroup):
+    logger.info('iniciando eliminar_contactgroup', extra=cons.EXTRA)
+    if tcgr.existe_contactgroup(lista_contactgroups, contactgroup):
+        tcgr.delete_contactgroup(lista_contactgroups, contactgroup)
+        tcgr.aplicar_cambios(lista_contactgroups)
+    else: logger.warning(f'el contactgroup {contactgroup} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_contactgroup', extra=cons.EXTRA)
+
+def copiar_contactgroup(lista_contactgroups, contactgroup, new):
+    logger.info('iniciando copiar_contactgroup', extra=cons.EXTRA)
+    if tcgr.existe_contactgroup(lista_contactgroups, contactgroup):
+        if not tcgr.existe_contactgroup(lista_contactgroups, new):
+            tcgr.copy_contactgroup(lista_contactgroups, contactgroup, new)
+            tcgr.aplicar_cambios(lista_contactgroups)
+        else: logger.warning(f'el contactgroup {new} ya existe en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else: logger.warning(f'el contactgroup {contactgroup} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    logger.info('finalizando copiar_contactgroup', extra=cons.EXTRA)
+
+def modificar_atributo_contactgroup(lista_contactgroups, name, atributo, new):
+    logger.info('iniciando modificar_atributo_contactgroup', extra=cons.EXTRA)
+    if not tcgr.existe_contactgroup(lista_contactgroups, name):
+        logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        if contactgroup.existe_atributo(atributo):
+            contactgroup.add_valor(atributo,new)
+            tcgr.aplicar_cambios(lista_contactgroups)
+        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+    logger.info('finalizando modificar_atributo_contactgroup', extra=cons.EXTRA)
+
+def eliminar_atributo_contactgroup(lista_contactgroups, name, atributo):
+    logger.info('iniciando eliminar_atributo_contactgroup', extra=cons.EXTRA)
+    if not tcgr.existe_contactgroup(lista_contactgroups, name):
+        logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        if contactgroup.existe_atributo(atributo):
+            contactgroup.del_parametro(atributo)
+            tcgr.aplicar_cambios(lista_contactgroups)
+        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_atributo_contactgroup', extra=cons.EXTRA)
+
+def mostrar_atributo_contactgroup(lista_contactgroups, name, atributo):
+    logger.info('iniciando mostrar_atributo_contactgroup', extra=cons.EXTRA)
+    if not tcgr.existe_contactgroup(lista_contactgroups, name):
+        logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        if contactgroup.existe_atributo(atributo):
+            print(contactgroup.get_valor(atributo))
+        else: logger.warning(f'no existe el contactgroup {name}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_atributo_contactgroup', extra=cons.EXTRA)
+
+def eliminar_elemento_contactgroup(lista_contactgroups, name, atributo, dato): #solo se puede eliminar un elem a la vez
+    logger.info('iniciando eliminar_elemento_contactgroup', extra=cons.EXTRA)
+    if not tcgr.existe_contactgroup(lista_contactgroups, name):
+        logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        if contactgroup.existe_atributo(atributo):
+            if contactgroup.existe_elemento(atributo, dato):
+                contactgroup.del_elemento(atributo, dato)
+                tcgr.aplicar_cambios(lista_contactgroups)
+            else: logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
+        else: logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_elemento_contactgroup', extra=cons.EXTRA)
+
+def agregar_elemento_contactgroup(lista_contactgroups, name, atributo, dato): #puede add varios elems separados x , Ej w,c,r
+    logger.info('iniciando agregar_elemento_contactgroup', extra=cons.EXTRA)
+    if not tcgr.existe_contactgroup(lista_contactgroups, name):
+        logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        if contactgroup.existe_atributo(atributo):
+            if not contactgroup.existe_elemento(atributo, dato):
+                contactgroup.add_elemento(atributo, dato)
+                tcgr.aplicar_cambios(lista_contactgroups)
+            else: logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+        else:
+            contactgroup.add_parametro([atributo, dato])
+            logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
+            tcgr.aplicar_cambios(lista_contactgroups)
+    logger.info('finalizando agregar_elemento_contactgroup', extra=cons.EXTRA)
+
+def agregar_parametro_contactgroup(lista_contactgroups, name, atributo, valor):
+    logger.info('iniciando agregar_parametro_contactgroup', extra=cons.EXTRA)
+    if not tcgr.existe_contactgroup(lista_contactgroups, name):
+        logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        if not contactgroup.existe_atributo(atributo):
+            contactgroup.add_parametro([atributo,valor])
+            logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
+            tcgr.aplicar_cambios(lista_contactgroups)
+        else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+    logger.info('finalizando agregar_parametro_contactgroup', extra=cons.EXTRA)
 
 if __name__ == '__main__':
 

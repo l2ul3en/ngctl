@@ -97,25 +97,23 @@ class Body:
         if not b:
             logger.debug(f'no se encontro {atr}', extra=cons.EXTRA)
 
-    def __clean_elementos(self,lista,atr,val):
-        """Elimina el parametro si el valor de atr es vacio."""
-        if len(lista) == 1 and lista[0] == val:
-            logger.info('se limpiara el atributo vacio', extra=cons.EXTRA)
+    def __clean_elementos(self,lista,atr):
+        """Elimina el parametro si no hay elementos."""
+        if len(lista) == 0:
+            logger.info(f'se limpiara el atributo {atr} vacio', extra=cons.EXTRA)
             self.del_parametro(atr)
-            return True
-        return False
 
     def del_elemento(self,atr,val,sep=','):
         """Elimina el valor de un atributo con separador."""
         parametro = self.get_parametro(atr)
         aux = parametro[1].split(sep)
-        if not self.__clean_elementos(aux,atr,val):
-            for i in range(len(aux)):
-                if aux[i] == val:
-                    del aux[i]
-                    parametro[1] = sep.join(aux)
-                    logger.debug(f'se elimino {val}', extra=cons.EXTRA)
-                    break
+        for i in range(len(aux)):
+            if aux[i] == val:
+                del aux[i]
+                parametro[1] = sep.join(aux)
+                logger.debug(f'se elimino {val}', extra=cons.EXTRA)
+                self.__clean_elementos(aux,atr)
+                break
             
     def rename_elemento(self, atr, val, new, sep=','):
         """Renombra el elemento de un atributo."""

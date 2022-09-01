@@ -36,7 +36,7 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
             if i == '' or i.startswith(('define','#')):
                 continue
             elif i.startswith('}'):
-                contact.ordenar(rev=True)
+                contact.ordenar()
                 if contact.existe_atributo(cons.ID_CNT,log=False):
                     lista_contact.append(contact)
                 contact = Contact()
