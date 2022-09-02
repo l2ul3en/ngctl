@@ -5,7 +5,6 @@
 from sys import path
 path.append('../../')
 import ngctl.config.constantes as cons
-#from ngctl.clases.Body import Body
 from ngctl.clases.Hostgroup import Hostgroup
 from subprocess import getoutput as geto
 from copy import deepcopy as copiar #permite copiar un objeto
@@ -61,7 +60,7 @@ def get_hostgroups(datos):
     """Devuelve una lista con todos los nombres de hostgroups."""
     return [x.get_name() for x in datos]
 
-def get_hostgroup(datos,hostgroup,log=False):
+def get_hostgroup(datos,hostgroup,log=True):
     """Retorna el objeto Hostgroup."""
     for i in datos:
         if i.get_name() == hostgroup:

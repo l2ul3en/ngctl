@@ -1,13 +1,6 @@
 #!/usr/bin/python3
 #-------------------------------------------------------------------------------
-# Name:        caller.py
 # Purpose:     Invocar funciones que realicen tareas especificas
-#
-# Author:      Personal
-#
-# Created:     13/09/2020
-# Copyright:   (c) Personal 2020
-# Licence:     <your licence>
 #-------------------------------------------------------------------------------
 from sys import path
 path.append('../../')
@@ -18,9 +11,7 @@ import ngctl.extras.toolsg as thgr
 import ngctl.extras.toolsCommand as tcmd
 import ngctl.extras.toolsContact as tcnt
 import ngctl.extras.toolsContactGroup as tcgr
-import ngctl.clases.Alarma #necesario para exportar
-import ngctl.clases.Host
-import ngctl.clases.Hostgroup
+import ngctl.clases #necesario para modulo search y export
 import logging, logging.config, re, csv
 from subprocess import getoutput as geto
 
@@ -477,36 +468,50 @@ def mostrar_atributo_grupo(lhostgroups, key, atributo):
         else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
     logger.info('finalizando mostrar_atributo_grupo', extra=cons.EXTRA)
 
-##Other
+##search
 
-def search_regexp(lista, regex):
-    logger.info('iniciando search_regexp', extra=cons.EXTRA)
+def _get_id_objeto(obj):
+    if isinstance(obj, ngctl.clases.Host.Host):
+        return cons.ID_HST
+    elif isinstance(obj, ngctl.clases.Alarma.Alarma):
+        return cons.ID_SRV
+    elif isinstance(obj, ngctl.clases.Hostgroup.Hostgroup):
+        return cons.ID_HGR
+    elif isinstance(obj, ngctl.clases.Command.Command):
+        return cons.ID_CMD
+    elif isinstance(obj, ngctl.clases.Contact.Contact):
+        return cons.ID_CNT
+    else:
+        return cons.ID_CGR
+    
+def search_atributo(lista, regex, atributo=None, show_name=False):
+    logger.info('iniciando search_atributo', extra=cons.EXTRA)
     filtro = re.compile(fr'{regex}')
-    out = [x.get_name() for x in lista if filtro.search(x.get_name())]
-    logger.info(f'se encontraron {len(out)} coincidencias para el patron {filtro.pattern!r}', extra=cons.EXTRA)
+    if atributo == None: aux = _get_id_objeto(lista[0])
+    else: aux = atributo
+    out = [ x for x in lista if filtro.search(str(x.get_valor(aux))) ]
+    logger.info(f'se encontraron {len(out)} coincidencias para el patron {filtro.pattern!r} en {aux}', extra=cons.EXTRA)
     for i in out:
-        print(i)
-    logger.info('finalizando search_regexp', extra=cons.EXTRA)
-
-def buscar_ip_host(lista, ip):
-    logger.info('iniciando buscar_ip_host', extra=cons.EXTRA)
-    c = 0
-    for i in thos.get_list_ip_in_host(lista,'address',ip):
-        print(i.get_name())
-        c += 1
-    logger.info(f'se encontraron {c} coincidencias para la IP {ip}', extra=cons.EXTRA)
-    logger.info('finalizando buscar_ip_host', extra=cons.EXTRA)
-
-def buscar_ip_alarma(lista, ip):
-    logger.info('iniciando buscar_ip_alarma', extra=cons.EXTRA)
-    c = 0
-    for i in tser.get_list_ip_in_alarma(lista,'check_command',ip,'!'):
-        print(i.get_name())
-        c += 1
-    logger.info(f'se encontraron {c} coincidencias para la IP {ip}', extra=cons.EXTRA)
-    logger.info('finalizando buscar_ip_alarma', extra=cons.EXTRA)
+        if show_name: print(i.get_name())
+        else: print(i.get_valor(aux))
+    logger.info('finalizando search_atributo', extra=cons.EXTRA)
 
 #export
+
+def _get_objeto(lista, name):
+    if isinstance(lista[0], ngctl.clases.Host.Host):
+        return thos.get_host(lista, name, log=False)
+    elif isinstance(lista[0], ngctl.clases.Alarma.Alarma):
+        return tser.get_alarma(lista, name, log=False)
+    elif isinstance(lista[0], ngctl.clases.Hostgroup.Hostgroup):
+        return thgr.get_hostgroup(lista, name, log=False)
+    elif isinstance(lista[0], ngctl.clases.Command.Command):
+        return tcmd.get_command(lista, name, log=False)
+    elif isinstance(lista[0], ngctl.clases.Contact.Contact):
+        return tcnt.get_contact(lista, name, log=False)
+    else:
+        return tcgr.get_contactgroup(lista, name, log=False)
+
 def generar_reporte(lista, file_in, file_out, separador_out=',', *atributos):
     logger.info('iniciando generar_reporte', extra=cons.EXTRA)
     writer = csv.DictWriter(file_out, fieldnames=atributos, delimiter=separador_out)
@@ -514,12 +519,7 @@ def generar_reporte(lista, file_in, file_out, separador_out=',', *atributos):
     for i in file_in:
         i = i.strip()
         if i != '':
-            if isinstance(lista[0], ngctl.clases.Host.Host):
-                obj = thos.get_host(lista, i, log=False)
-            elif isinstance(lista[0], ngctl.clases.Alarma.Alarma):
-                obj = tser.get_alarma(lista, i, log=False)
-            else:
-                obj = thgr.get_hostgroup(lista, i, log=False)
+            obj = _get_objeto(lista, i)
             data_row = {}
             for atributo in atributos:
                 if obj.existe_atributo(atributo, log=False):
@@ -860,6 +860,4 @@ def agregar_parametro_contactgroup(lista_contactgroups, name, atributo, valor):
     logger.info('finalizando agregar_parametro_contactgroup', extra=cons.EXTRA)
 
 if __name__ == '__main__':
-
-    l = cargar_hostgroups()
-    mostrar_listado_hostgroup(l,'NVR_PARAGU')
+    pass

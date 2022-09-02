@@ -5,7 +5,6 @@
 from sys import path
 path.append('../../')
 import ngctl.config.constantes as cons
-#from ngctl.clases.Body import Body
 from ngctl.clases.Host import Host
 from subprocess import getoutput as geto
 from copy import deepcopy as copiar #permite copiar un objeto
@@ -72,10 +71,6 @@ def get_host(datos,host, log=True):
 def get_list_dato_in_host(lista,atr,dato):
     """Devuelve un iterable con todos los objetos Host que tengan el atributo atr y el elemento dato."""
     return filter(lambda x: x.existe_elemento(atr,dato),lista)
-
-def get_list_ip_in_host(lista,atr,ip):
-    """Devuelve un iterable con todos los objetos Host que tengan la ip."""
-    return filter(lambda x: x.existe_atributo(atr, False) and x.get_valor(atr) == ip,lista)
 
 def delete_host(datos,host):
     """Elimina las alarmas asociadas al host inidicado."""

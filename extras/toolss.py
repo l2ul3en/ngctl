@@ -6,7 +6,6 @@ from sys import path, exit as kill
 path.append('../../')
 import ngctl.config.constantes as cons
 from ngctl.clases.Alarma import Alarma
-#from ngctl.clases.Body import Body
 from subprocess import getoutput as geto
 from copy import deepcopy as copiar #permite copiar un objeto
 import logging,logging.config,re
@@ -63,10 +62,6 @@ def get_alarmas(datos):
 def get_listado_alarmas(datos,host):
     """Devuelve una lista con todos los nombres de las alarmas del host."""
     return [x.get_name() for x in datos if x.get_host() == host and x.get_tipo() == 'define service{']
-
-def get_list_ip_in_alarma(lista,atr,ip,sep):
-    """Devuelve un iterable con todos los objetos Alarma que tengan el elemento ip."""
-    return filter(lambda x: x.existe_elemento(atr,ip,sep),lista)
 
 def get_frec_host(datos,host):
     """Devuelve el nro de alarmas del host."""

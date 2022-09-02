@@ -44,7 +44,7 @@ def validar_longitud_sep(sep):
     return sep
 
 def status(name):
-    logger.info(f'{name} [alarmas/hosts/grupos/commands/contacts/contactgroup] [\
+    logger.info(f'{name} [alarmas/hosts/grupos/commands/contacts/contactgroups] [\
 {call.get_cantidad_alarmas(lista_alarmas)}/{call.get_cantidad_hosts(lista_hosts)}/{len(lista_grupos)}/{len(lista_commands)}/{len(lista_contacts)}/{len(lista_contactgroups)}\
 ]', extra=cons.EXTRA)
 
@@ -236,36 +236,33 @@ def exec_contact_atrib(args):
     else: edit_cnt.print_usage()
     status(exec_contact_atrib.__name__)
 
-def exec_other(args):
-    status(exec_other.__name__)
-    if args.buscar != None:
-        if args.buscar == 'alarma':
-            call.search_regexp(lista_alarmas, args.regex)
-        elif args.buscar == 'host':
-            call.search_regexp(lista_hosts, args.regex)
-        else: call.search_regexp(lista_grupos, args.regex)
-    elif args.ip != None:
-        try:
-            args.regex = validar_formato_ip(args.regex)
-        except:
-            print(f'{args.regex!r} is not a valid IP')
-            kill(254)
-        if args.ip == 'host':
-            call.buscar_ip_host(lista_hosts, args.regex)
-        else:
-            call.buscar_ip_alarma(lista_alarmas, args.regex)
-    else: other.print_usage()
-    status(exec_other.__name__)
+def _get_lista_objetos(tipo):
+    if tipo == 'alarma':
+        return lista_alarmas
+    elif tipo == 'host':
+        return lista_hosts
+    elif tipo == 'grupo':
+        return lista_grupos
+    elif tipo == 'command':
+        return lista_commands
+    elif tipo == 'contact':
+        return lista_contacts
+    else: 
+        return lista_contactgroups
+
+def exec_search(args):
+    status(exec_search.__name__)
+    lista = _get_lista_objetos(args.tipo)
+    if args.atributo != None:
+        call.search_atributo(lista, args.regexp, args.atributo, args.force)
+    elif args.atributo == None:
+        call.search_atributo(lista, args.regexp, show_name=args.force)
+    else: search.print_usage()
+    status(exec_search.__name__)
 
 def exec_export(args):
     status(exec_export.__name__)
-    if args.tipo == 'alarma':
-        lista = lista_alarmas
-    elif args.tipo == 'host':
-        lista = lista_hosts
-    else:
-        lista = lista_grupos
-
+    lista = _get_lista_objetos(args.tipo)
     if args.columns != None:
         call.generar_reporte(lista, args.Input, args.Output, args.delimiter, *args.columns)
     elif args.columns == None:
@@ -285,25 +282,25 @@ def create_command():
     global parser
     parser = argparse.ArgumentParser(description='nagiosctl es usado para procesar objetos de configuracion nagios de manera modular.')
     subparsers = parser.add_subparsers()
-
+    tipos_objetos = ['alarma','host','grupo','command','contact','contactgroup']
     #An export subcommand
     global export
     export = subparsers.add_parser('export', aliases='e', help='Exportar a salida personalizada')
-    export.add_argument('tipo', choices=['alarma','host','grupo'],help='exporta las definiciones de acuerdo al criterio seleccionado')
+    export.add_argument('tipo', choices=tipos_objetos, help='exporta las definiciones de acuerdo al criterio seleccionado')
     export.add_argument('-c', '--columns', nargs='+',help='lista de atributos a exportar en file-out; nombres de columna')
     export.add_argument('-I', '--Input', metavar='file-in',type=argparse.FileType('r'), default='-', help='ruta al archivo de entrada de datos, sin encabezado; por defecto stdin')
     export.add_argument('-O', '--Output', metavar='file-out',type=argparse.FileType('w'), default='-', help='ruta al archivo de salida; por defecto stdout')
     export.add_argument('-d', '--delimiter', default=',', type=validar_longitud_sep, help='separador de columnas en archivo de salida; por defecto ,')
     export.set_defaults(func=exec_export)
 
-    #A other subcommand
-    global other
-    other = subparsers.add_parser('search', aliases='b', help='Busqueda con expresiones regulares extendidas')
-    other.add_argument('regex',help='expresion regular')
-    grp_ot = other.add_mutually_exclusive_group()
-    grp_ot.add_argument('-b','--buscar',choices=['alarma','host','grupo'],help='busqueda de acuerdo al criterio seleccionado')
-    grp_ot.add_argument('-i','--ip', choices=['alarma','host'], help='busqueda de IP de acuerdo al criterio seleccionado')
-    other.set_defaults(func=exec_other)
+    #A search subcommand
+    global search
+    search = subparsers.add_parser('search', aliases='b', help='Busqueda con expresiones regulares extendidas')
+    search.add_argument('tipo', choices=tipos_objetos, help='busqueda de acuerdo al objeto seleccionado')
+    search.add_argument('-a', '--atributo', nargs='?', help='atributo a buscar; por defecto nombre de objeto seleccionado')
+    search.add_argument('-r', '--regexp', required=True, help='expresion regular extendida')
+    search.add_argument('-f', '--force-name', dest='force', action='store_true', default=False, help='forzar a mostrar nombre de objeto que coincide con la busqueda')
+    search.set_defaults(func=exec_search)
 
     #A hostgroup subcommand
     global hgroup 
