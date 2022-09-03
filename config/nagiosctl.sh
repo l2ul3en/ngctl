@@ -42,6 +42,7 @@ _get_cant_opciones_host(){
     done
     echo $boleano $con_parametro $sin_parametro
 }
+
 _get_cant_opciones_group(){
 #Retorna un array por tipo (booleano, con/sin parametro) de la cantidad de las opciones del modulo group
     local con_parametro=0; local boleano=0; local sin_parametro=0; local i=2
@@ -56,6 +57,7 @@ _get_cant_opciones_group(){
     done
     echo $boleano $con_parametro $sin_parametro
 }
+
 _get_cant_opciones_service(){
 #Retorna un array por tipo (booleano, con/sin parametro) de la cantidad de las opciones del modulo service
     local con_parametro=0; local boleano=0; local sin_parametro=0; local i=2
@@ -110,6 +112,51 @@ _sy_get_lastword() {
 	echo $lastword
 }
 
+_get_cant_opciones_command(){
+#Retorna un array por tipo (booleano, con/sin parametro) de la cantidad de las opciones del modulo command
+    local con_parametro=0; local boleano=0; local sin_parametro=0; local i=2
+    until [[ $i -ge ${#COMP_WORDS[@]} ]] || [[ ${COMP_WORDS[i]} == edit ]]; do
+        case ${COMP_WORDS[i]} in
+            --copy|--rename|-r|-c) con_parametro=$(($con_parametro+1)); i=$(($i+1));;
+            --delete|--show|-d|-s|-h|--help) boleano=$(($boleano+1));;
+            '') : ;;
+            *) sin_parametro=$(($sin_parametro+1)) ;;
+        esac
+        i=$(($i+1))
+    done
+    echo $boleano $con_parametro $sin_parametro
+}
+
+_get_cant_opciones_contact(){
+#Retorna un array por tipo (booleano, con/sin parametro) de la cantidad de las opciones del modulo contact
+    local con_parametro=0; local boleano=0; local sin_parametro=0; local i=2
+    until [[ $i -ge ${#COMP_WORDS[@]} ]] || [[ ${COMP_WORDS[i]} == edit ]]; do
+        case ${COMP_WORDS[i]} in
+            --copy|--rename|-r|-c) con_parametro=$(($con_parametro+1)); i=$(($i+1));;
+            --delete|--show|-d|-s|-h|--help) boleano=$(($boleano+1));;
+            '') : ;;
+            *) sin_parametro=$(($sin_parametro+1)) ;;
+        esac
+        i=$(($i+1))
+    done
+    echo $boleano $con_parametro $sin_parametro
+}
+
+_get_cant_opciones_contactgroup(){
+#Retorna un array por tipo (booleano, con/sin parametro) de la cantidad de las opciones del modulo contactgroup
+    local con_parametro=0; local boleano=0; local sin_parametro=0; local i=2
+    until [[ $i -ge ${#COMP_WORDS[@]} ]] || [[ ${COMP_WORDS[i]} == edit ]]; do
+        case ${COMP_WORDS[i]} in
+            --copy|--rename|-r|-c) con_parametro=$(($con_parametro+1)); i=$(($i+1));;
+            --delete|--show|-d|-s|-h|--help) boleano=$(($boleano+1));;
+            '') : ;;
+            *) sin_parametro=$(($sin_parametro+1)) ;;
+        esac
+        i=$(($i+1))
+    done
+    echo $boleano $con_parametro $sin_parametro
+}
+
 _nagiosctl(){
 	local cur prev complete_options complete_words tam firstword lastword
 	COMPREPLY=()
@@ -123,15 +170,19 @@ _nagiosctl(){
 		search\
 		group\
 		service\
-		hostname"
-	GLOBAL_OPTIONS="\
-		-h --help\
-		-f --file"
+		hostname\
+		export\
+		command\
+		contact\
+		contactgroup"
+
+	GLOBAL_OPTIONS="-h --help"
 
 	SEARCH_OPTIONS="\
 		-h --help\
-		-b --buscar\
-		-i --ip"
+		-a --atributo\
+		-r --regexp\
+		-f --force-name"
 
 	GROUP_OPTIONS="\
 		-h --help\
@@ -170,28 +221,51 @@ _nagiosctl(){
 		-n --new\
 		-x --delete-elemento"
 
+	EXPORT_OPTIONS="\
+		-h --help\
+		-c --columns\
+		-I --Input\
+		-O --Output\
+		-d --delimiter"
+
+	COMMAND_OPTIONS="\
+		-h --help\
+		-c --copy\
+		-d --delete\
+		-r --rename\
+		-s --show"
+
+	CONTACT_OPTIONS=$COMMAND_OPTIONS
+	CONTACTGROUP_OPTIONS=$COMMAND_OPTIONS
+
+	OBJETOS='alarma host grupo command contact contactgroup'
 
 	#Un-comment this for debug purposes:
-#	echo -e "prev = $prev, cur = $cur, firstword = $firstword, lastword = $lastword, len = $tam" >> /home/manfred/compl.log
+	#echo -e "prev = $prev, cur = $cur, firstword = $firstword, lastword = $lastword, len = $tam" >> /home/manfred/compl.log
 
 	case $firstword in
-		search)
-			case $prev in
-				--buscar|-b)
-					COMPREPLY=( $(compgen -W "alarma host grupo" -- $cur) ); return 0;;
-				--ip|-i)
-					COMPREPLY=( $(compgen -W "alarma host" -- $cur) ); return 0;;
-				*)
-					if [[ $tam -lt 5 ]]; then
-						complete_options=$SEARCH_OPTIONS
-					fi
-					;;
-			esac
+		
+		export)
+			if [[ ($prev == export) && ($tam -le 3) ]]; then
+				COMPREPLY=( $(compgen -W "$OBJETOS" -- $cur) ); return 0
+			elif [[ $tam -ge 3 ]]; then
+				complete_options=$EXPORT_OPTIONS
+			fi	
 			;;
+
+		search)
+		
+			if [[ ($prev == search) && ($tam -le 3) ]]; then
+				COMPREPLY=( $(compgen -W "$OBJETOS" -- $cur) ); return 0
+			elif [[ ($tam -ge 3) && ($tam -le 8) ]]; then
+				complete_options=$SEARCH_OPTIONS
+			fi
+			;;
+
 		group)
+
 			local exist_edit exist_host exist_grupo exist_edit_name cant_opc_grupo cant_opc_edit param_total e_bool e_con_para e_sin_para tam_real 
 			exist_edit=$(_get_frec 'edit')
-
 			lista=($(_get_cant_opciones_group))
 #			echo "group: ${lista[@]}" >> ~/compl.log
 			booleano=${lista[0]}
@@ -202,7 +276,6 @@ _nagiosctl(){
 			cant_opc_grupo=$(($booleano+$con_parametro))
 			param_total=$(( $booleano+$sin_parametro+2+($con_parametro*2) ))
 #			echo "par=$con_parametro, bol=$booleano, arg-posic=$sin_parametro, tam_real=$tam_real, total=$param_total" >> ~/compl.log
-
 			if [[ $exist_edit -eq 1 ]]; then
 				arr=($(_get_cant_opciones_edit))
 #				echo "edit: ${arr[@]}" >> ~/compl.log
@@ -215,7 +288,6 @@ _nagiosctl(){
 				param_total=$(( $param_total+1+$e_bool+$e_sin_para+($e_con_para*2) ))
 #				echo "edit_param=$cant_opc_edit, atributo-name=$exist_edit_name, tam_real=$tam_real, total=$param_total" >> ~/compl.log
 			fi
-
 			if [[ ($exist_edit -eq 0 ) && ($prev != group ) && (($cant_opc_grupo -le 1) && ($exist_grupo -eq 1) && ($param_total -eq $tam_real)) && ($tam -eq 4) && ($cur != -* ) ]]; then
 				COMPREPLY=( $(compgen -W "edit" -- $cur) ); return 0
 			elif [[ ($exist_edit -eq 0 ) && ($tam -lt 5) ]]; then
@@ -225,6 +297,7 @@ _nagiosctl(){
 			else
 				return 0
 			fi
+
 			;;
 		service)
 			local exist_edit exist_host exist_alarma exist_edit_name cant_opc_serv cant_opc_edit param_total 
@@ -317,6 +390,118 @@ _nagiosctl(){
 				return 0
 			fi
 			;;
+		command)
+
+			local exist_cmd cant_opc_cmd
+			local exist_edit exist_edit_name cant_opc_edit param_total e_bool e_con_para e_sin_para tam_real lista arr
+			exist_edit=$(_get_frec 'edit')
+			lista=($(_get_cant_opciones_command))
+#			echo "group: ${lista[@]}" >> ~/compl.log
+			booleano=${lista[0]}
+			con_parametro=${lista[1]}
+			sin_parametro=${lista[2]}
+			tam_real=$(_get_tam)
+			exist_cmd=$sin_parametro
+			cant_opc_cmd=$(($booleano+$con_parametro))
+			param_total=$(( $booleano+$sin_parametro+2+($con_parametro*2) ))
+#			echo "par=$con_parametro, bol=$booleano, arg-posic=$sin_parametro, tam_real=$tam_real, total=$param_total" >> ~/compl.log
+			if [[ $exist_edit -eq 1 ]]; then
+				arr=($(_get_cant_opciones_edit))
+#				echo "edit: ${arr[@]}" >> ~/compl.log
+				e_bool=${arr[0]}
+				e_con_para=${arr[1]}
+				e_sin_para=${arr[2]}
+				tam_real=$(_get_tam)
+				exist_edit_name=$e_sin_para
+				cant_opc_edit=$(($e_bool+$e_con_para))
+				param_total=$(( $param_total+1+$e_bool+$e_sin_para+($e_con_para*2) ))
+#				echo "edit_param=$cant_opc_edit, atributo-name=$exist_edit_name, tam_real=$tam_real, total=$param_total" >> ~/compl.log
+			fi
+			if [[ ($exist_edit -eq 0 ) && ($prev != command ) && (($cant_opc_cmd -le 1) && ($exist_cmd -eq 1) && ($param_total -eq $tam_real)) && ($tam -eq 4) && ($cur != -* ) ]]; then
+				COMPREPLY=( $(compgen -W "edit" -- $cur) ); return 0
+			elif [[ ($exist_edit -eq 0 ) && ($tam -lt 5) ]]; then
+				complete_options=$COMMAND_OPTIONS
+			elif [[ ($exist_edit -eq 1) && (($tam -ge 5) && ($tam -le 6)) && ($prev != -* ) && (($cant_opc_edit -le 1) && ($exist_edit_name -le 2) && ($param_total -eq $tam_real)) ]]; then
+				complete_options=$EDIT_OPTIONS
+			else
+				return 0
+			fi
+			;;
+
+		contact)
+			local exist_cnt cant_opc_cnt
+			local exist_edit exist_edit_name cant_opc_edit param_total e_bool e_con_para e_sin_para tam_real lista arr
+			exist_edit=$(_get_frec 'edit')
+			lista=($(_get_cant_opciones_contact))
+#			echo "group: ${lista[@]}" >> ~/compl.log
+			booleano=${lista[0]}
+			con_parametro=${lista[1]}
+			sin_parametro=${lista[2]}
+			tam_real=$(_get_tam)
+			exist_cnt=$sin_parametro
+			cant_opc_cnt=$(($booleano+$con_parametro))
+			param_total=$(( $booleano+$sin_parametro+2+($con_parametro*2) ))
+#			echo "par=$con_parametro, bol=$booleano, arg-posic=$sin_parametro, tam_real=$tam_real, total=$param_total" >> ~/compl.log
+			if [[ $exist_edit -eq 1 ]]; then
+				arr=($(_get_cant_opciones_edit))
+#				echo "edit: ${arr[@]}" >> ~/compl.log
+				e_bool=${arr[0]}
+				e_con_para=${arr[1]}
+				e_sin_para=${arr[2]}
+				tam_real=$(_get_tam)
+				exist_edit_name=$e_sin_para
+				cant_opc_edit=$(($e_bool+$e_con_para))
+				param_total=$(( $param_total+1+$e_bool+$e_sin_para+($e_con_para*2) ))
+#				echo "edit_param=$cant_opc_edit, atributo-name=$exist_edit_name, tam_real=$tam_real, total=$param_total" >> ~/compl.log
+			fi
+			if [[ ($exist_edit -eq 0 ) && ($prev != contact ) && (($cant_opc_cnt -le 1) && ($exist_cnt -eq 1) && ($param_total -eq $tam_real)) && ($tam -eq 4) && ($cur != -* ) ]]; then
+				COMPREPLY=( $(compgen -W "edit" -- $cur) ); return 0
+			elif [[ ($exist_edit -eq 0 ) && ($tam -lt 5) ]]; then
+				complete_options=$CONTACT_OPTIONS
+			elif [[ ($exist_edit -eq 1) && (($tam -ge 5) && ($tam -le 6)) && ($prev != -* ) && (($cant_opc_edit -le 1) && ($exist_edit_name -le 2) && ($param_total -eq $tam_real)) ]]; then
+				complete_options=$EDIT_OPTIONS
+			else
+				return 0
+			fi
+			;;
+
+		contactgroup)
+			local exist_cgr cant_opc_cgr
+			local exist_edit exist_edit_name cant_opc_edit param_total e_bool e_con_para e_sin_para tam_real lista arr
+			exist_edit=$(_get_frec 'edit')
+			lista=($(_get_cant_opciones_contactgroup))
+#			echo "group: ${lista[@]}" >> ~/compl.log
+			booleano=${lista[0]}
+			con_parametro=${lista[1]}
+			sin_parametro=${lista[2]}
+			tam_real=$(_get_tam)
+			exist_cgr=$sin_parametro
+			cant_opc_cgr=$(($booleano+$con_parametro))
+			param_total=$(( $booleano+$sin_parametro+2+($con_parametro*2) ))
+#			echo "par=$con_parametro, bol=$booleano, arg-posic=$sin_parametro, tam_real=$tam_real, total=$param_total" >> ~/compl.log
+			if [[ $exist_edit -eq 1 ]]; then
+				arr=($(_get_cant_opciones_edit))
+#				echo "edit: ${arr[@]}" >> ~/compl.log
+				e_bool=${arr[0]}
+				e_con_para=${arr[1]}
+				e_sin_para=${arr[2]}
+				tam_real=$(_get_tam)
+				exist_edit_name=$e_sin_para
+				cant_opc_edit=$(($e_bool+$e_con_para))
+				param_total=$(( $param_total+1+$e_bool+$e_sin_para+($e_con_para*2) ))
+#				echo "edit_param=$cant_opc_edit, atributo-name=$exist_edit_name, tam_real=$tam_real, total=$param_total" >> ~/compl.log
+			fi
+			if [[ ($exist_edit -eq 0 ) && ($prev != contactgroup ) && (($cant_opc_cgr -le 1) && ($exist_cgr -eq 1) && ($param_total -eq $tam_real)) && ($tam -eq 4) && ($cur != -* ) ]]; then
+				COMPREPLY=( $(compgen -W "edit" -- $cur) ); return 0
+			elif [[ ($exist_edit -eq 0 ) && ($tam -lt 5) ]]; then
+				complete_options=$CONTACTGROUP_OPTIONS
+			elif [[ ($exist_edit -eq 1) && (($tam -ge 5) && ($tam -le 6)) && ($prev != -* ) && (($cant_opc_edit -le 1) && ($exist_edit_name -le 2) && ($param_total -eq $tam_real)) ]]; then
+				complete_options=$EDIT_OPTIONS
+			else
+				return 0
+			fi
+			;;
+
 		*)
 			if [[ $tam -eq 2 ]]; then	
 				complete_words="$GLOBAL_MODULE"

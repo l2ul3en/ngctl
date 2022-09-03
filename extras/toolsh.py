@@ -109,7 +109,6 @@ def existe_host(datos,host):
 def rename_host(datos, host, new):
     for i in range(len(datos)):
         if datos[i].get_name() == host and datos[i].get_tipo() == 'define host{':
-#           datos[i].add_name(new)
             datos[i].add_valor(cons.ID_HST, new)
             datos[i].add_valor('alias',new)
             logger.info(f'se actualizo el nombre de {host} a {new} en {cons.ORIG_HST}', extra=cons.EXTRA)
