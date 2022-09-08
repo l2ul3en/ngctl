@@ -103,7 +103,7 @@ class Body:
             logger.info(f'se limpiara el atributo {atr} vacio', extra=cons.EXTRA)
             self.del_parametro(atr)
 
-    def del_elemento(self,atr,val,sep=','):
+    def del_elemento(self,atr,val,sep=',', log=True):
         """Elimina el valor de un atributo con separador."""
         parametro = self.get_parametro(atr)
         aux = parametro[1].split(sep)
@@ -111,11 +111,11 @@ class Body:
             if aux[i] == val:
                 del aux[i]
                 parametro[1] = sep.join(aux)
-                logger.debug(f'se elimino {val}', extra=cons.EXTRA)
+                if log: logger.debug(f'se elimino {val}', extra=cons.EXTRA)
                 self.__clean_elementos(aux,atr)
                 break
             
-    def rename_elemento(self, atr, val, new, sep=','):
+    def rename_elemento(self, atr, val, new, sep=',', log=True):
         """Renombra el elemento de un atributo."""
         parametro = self.get_parametro(atr)
         aux = parametro[1].split(sep)
@@ -123,7 +123,7 @@ class Body:
             if aux[i] == val:
                 aux[i] = new
                 parametro[1] = sep.join(aux)
-                logger.debug(f'se asigno a {atr} {new} en lugar de {val}', extra=cons.EXTRA)
+                if log: logger.debug(f'se asigno a {atr} {new} en lugar de {val}', extra=cons.EXTRA)
                 break
             
     def ordenar(self,rev=False):

@@ -191,18 +191,18 @@ def renombrar_host(lalarmas, lhostgroups, lhosts, host, new, verbose):
     else:
         frec = 0
         for i in thgr.get_list_host_in_group(lhostgroups,host):
-            i.rename_elemento('members', host, new)
+            i.rename_elemento('members', host, new, log=False)
             frec += 1
-        logger.info(f'se modifico {frec} grupos en {cons.ORIG_HGR}', extra=cons.EXTRA)
         if frec > 0:
+            logger.info(f'se modifico {frec} grupos en {cons.ORIG_HGR}', extra=cons.EXTRA)
             thgr.aplicar_cambios(lhostgroups)
         frec = tser.get_frec_host(lalarmas, host)
         if frec > 0:
             tser.rename_host(lalarmas, host, new)
             tser.aplicar_cambios(lalarmas)
-        logger.info(f'se modifico {frec} alarmas en {cons.ORIG_SRV}', extra=cons.EXTRA)
-        if verbose and frec > 0:
-            tser.mostrar_host(lalarmas, new)
+        if frec > 0:
+            logger.info(f'se modifico {frec} alarmas en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            if verbose: tser.show_alarma_host(lalarmas, new)
         thos.rename_host(lhosts, host, new)
         thos.aplicar_cambios(lhosts)
     logger.info('finalizando renombrar_host', extra=cons.EXTRA)
@@ -542,13 +542,33 @@ def mostrar_command(lista, command):
     else: logger.warning(f'no se encontro el command {command} definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
     logger.info('finalizando mostrar_command', extra=cons.EXTRA)
 
-def eliminar_command(lista_commands, command):
+def eliminar_command(lista_commands, command_name):
     logger.info('iniciando eliminar_command', extra=cons.EXTRA)
-    if tcmd.existe_command(lista_commands, command):
-        tcmd.delete_command(lista_commands, command)
+    if tcmd.existe_command(lista_commands, command_name):
+        tcmd.delete_command(lista_commands, command_name)
         tcmd.aplicar_cambios(lista_commands)
     else: logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
     logger.info('finalizando eliminar_command', extra=cons.EXTRA)
+
+def renombrar_command(lista_alarmas, lista_commands, command_name, new):
+    logger.info('iniciando renombrar_command', extra=cons.EXTRA)
+    if not tcmd.existe_command(lista_commands, command_name):
+        logger.warning(f'no existe definicion de {command_name} en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    elif tcmd.existe_command(lista_commands, new):
+        logger.warning(f'el contact {new} ya existe en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        frecuencia = 0
+        for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'check_command', command_name, sep='!'):
+            alarma.rename_elemento('check_command', command_name, new, sep='!', log=False)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.info(f'se renombro {frecuencia} check_command en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            tser.aplicar_cambios(lista_alarmas)
+        command = tcmd.get_command(lista_commands, command_name)
+        command.rename_elemento(cons.ID_CMD, command_name, new, log=False)
+        logger.info(f'se renombro {command_name} con {new} en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        tcmd.aplicar_cambios(lista_commands)
+    logger.info('finalizando renombrar_contact', extra=cons.EXTRA)
 
 def copiar_command(lista_commands, command, new):
     logger.info('iniciando copiar_command', extra=cons.EXTRA)
@@ -652,13 +672,64 @@ def mostrar_contact(lista, contact):
     else: logger.warning(f'no se encontro el contact {contact} definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
     logger.info('finalizando mostrar_contact', extra=cons.EXTRA)
 
-def eliminar_contact(lista_contacts, contact):
+def eliminar_contact(lista_contactgroups, lista_alarmas, lista_hosts, lista_contacts, contact_name):
     logger.info('iniciando eliminar_contact', extra=cons.EXTRA)
-    if tcnt.existe_contact(lista_contacts, contact):
-        tcnt.delete_contact(lista_contacts, contact)
+    if tcnt.existe_contact(lista_contacts, contact_name):
+        frecuencia = 0
+        for contactgroup in tcgr.get_parametro_in_contactgroup(lista_contactgroups, 'members', contact_name):
+            contactgroup.del_elemento('members', contact_name, log=False)
+            logger.warning(f'se elimino el contact {contact_name} del contactgroup {contactgroup.get_name()}', extra=cons.EXTRA)
+            frecuencia += 1
+        if frecuencia > 0: tcgr.aplicar_cambios(lista_contactgroups)
+        frecuencia = 0
+        for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'contacts', contact_name):
+            alarma.del_elemento('contacts', contact_name, log=False)
+            logger.warning(f'se elimino el contact {contact_name} de la alarma {alarma.get_name()}', extra=cons.EXTRA)
+            frecuencia += 1
+        if frecuencia > 0: tser.aplicar_cambios(lista_alarmas)
+        frecuencia = 0
+        for host in thos.get_parametro_in_host(lista_hosts, 'contacts', contact_name):
+            host.del_elemento('contacts', contact_name, log=False)
+            logger.warning(f'se elimino el contact {contact_name} del host {host.get_name()}', extra=cons.EXTRA)
+            frecuencia += 1
+        if frecuencia > 0: thos.aplicar_cambios(lista_hosts)
+        tcnt.delete_contact(lista_contacts, contact_name)
         tcnt.aplicar_cambios(lista_contacts)
     else: logger.warning(f'el contact {contact} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
-    logger.info('finalizando eliminar_contact', extra=cons.EXTRA)
+
+def renombrar_contact(lista_contactgroups, lista_alarmas, lista_hosts, lista_contacts, contact_name, new):
+    logger.info('iniciando renombrar_contact', extra=cons.EXTRA)
+    if not tcnt.existe_contact(lista_contacts, contact_name):
+        logger.warning(f'no existe definicion de {contact_name} en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    elif tcnt.existe_contact(lista_contacts, new):
+        logger.warning(f'el contact {new} ya existe en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        frecuencia = 0
+        for contactgroup in tcgr.get_parametro_in_contactgroup(lista_contactgroups, 'members', contact_name):
+            contactgroup.rename_elemento('members', contact_name, new, log=False)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.info(f'se renombro {frecuencia} contactgroups en {cons.ORIG_CGR}', extra=cons.EXTRA)
+            tcgr.aplicar_cambios(lista_contactgroups)
+        frecuencia = 0
+        for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'contacts', contact_name):
+            alarma.rename_elemento('contacts', contact_name, new, log=False)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.info(f'se renombro {frecuencia} alarmas en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            tser.aplicar_cambios(lista_alarmas)
+        frecuencia = 0
+        for host in thos.get_parametro_in_host(lista_hosts, 'contacts', contact_name):
+            host.rename_elemento('contacts', contact_name, new, log=False)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.info(f'se renombro {frecuencia} hosts en {cons.ORIG_HST}', extra=cons.EXTRA)
+            thos.aplicar_cambios(lista_hosts)
+        contact = tcnt.get_contact(lista_contacts, contact_name)
+        contact.rename_elemento(cons.ID_CNT, contact_name, new, log=False)
+        logger.info(f'se renombro {contact_name} con {new} en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        tcnt.aplicar_cambios(lista_contacts)
+    logger.info('finalizando renombrar_contact', extra=cons.EXTRA)
 
 def copiar_contact(lista_contacts, contact, new):
     logger.info('iniciando copiar_contact', extra=cons.EXTRA)
@@ -669,6 +740,17 @@ def copiar_contact(lista_contacts, contact, new):
         else: logger.warning(f'el contact {new} ya existe en {cons.ORIG_CNT}', extra=cons.EXTRA)
     else: logger.warning(f'el contact {contact} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
     logger.info('finalizando copiar_contact', extra=cons.EXTRA)
+
+def mostrar_listado_contactgroup(lista_contacts, lista_contactgroups, contact_name):
+    logger.info('iniciando mostrar_listado_contactgroup', extra=cons.EXTRA)
+    if tcnt.existe_contact(lista_contacts, contact_name):
+        frecuencia = 0
+        for contactgroup in tcgr.get_parametro_in_contactgroup(lista_contactgroups, 'members', contact_name):
+            print (contactgroup.get_name())
+            frecuencia += 1
+        logger.info(f'se visualizo {frecuencia} contactgroups asociados al contact {contact_name}', extra=cons.EXTRA)
+    else: logger.warning(f'el contact {contact_name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_listado_contactgroup', extra=cons.EXTRA)
 
 def modificar_atributo_contact(lista_contacts, name, atributo, new):
     logger.info('iniciando modificar_atributo_contact', extra=cons.EXTRA)
@@ -762,13 +844,54 @@ def mostrar_contactgroup(lista, contactgroup):
     else: logger.warning(f'no se encontro el contactgroup {contactgroup} definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
     logger.info('finalizando mostrar_contactgroup', extra=cons.EXTRA)
 
-def eliminar_contactgroup(lista_contactgroups, contactgroup):
+def eliminar_contactgroup(lista_hosts, lista_alarmas, lista_contactgroups, contactgroup_name):
     logger.info('iniciando eliminar_contactgroup', extra=cons.EXTRA)
-    if tcgr.existe_contactgroup(lista_contactgroups, contactgroup):
-        tcgr.delete_contactgroup(lista_contactgroups, contactgroup)
+    if tcgr.existe_contactgroup(lista_contactgroups, contactgroup_name):
+        frecuencia = 0
+        for host in thos.get_parametro_in_host(lista_hosts, 'contact_groups', contactgroup_name):
+            host.del_elemento('contact_groups', contactgroup_name, log=False)
+            frecuencia += 1
+        if frecuencia > 0: 
+            logger.warning(f'se elimino {frecuencia} hosts en {cons.ORIG_HST}', extra=cons.EXTRA)
+            thos.aplicar_cambios(lista_hosts)
+        frecuencia = 0
+        for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'contact_groups', contactgroup_name):
+            alarma.del_elemento('contact_groups', contactgroup_name, log=False)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.warning(f'se elimino {frecuencia} alarmas en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            tser.aplicar_cambios(lista_alarmas)
+        tcgr.delete_contactgroup(lista_contactgroups, contactgroup_name)
         tcgr.aplicar_cambios(lista_contactgroups)
     else: logger.warning(f'el contactgroup {contactgroup} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
     logger.info('finalizando eliminar_contactgroup', extra=cons.EXTRA)
+
+def renombrar_contactgroup(lista_alarmas, lista_hosts, lista_contactgroups, contactgroup_name, new):
+    logger.info('iniciando renombrar_contactgroup', extra=cons.EXTRA)
+    if not tcgr.existe_contactgroup(lista_contactgroups, contactgroup_name):
+        logger.warning(f'no existe definicion de {contactgroup_name} en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    elif tcgr.existe_contactgroup(lista_contactgroups, new):
+        logger.warning(f'el contactgroup {new} ya existe en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        frecuencia = 0
+        for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'contact_groups', contactgroup_name):
+            alarma.rename_elemento('contact_groups', contactgroup_name, new, log=False)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.info(f'se renombro {frecuencia} alarmas en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            tser.aplicar_cambios(lista_alarmas)
+        frecuencia = 0
+        for host in thos.get_parametro_in_host(lista_hosts, 'contact_groups', contactgroup_name):
+            host.rename_elemento('contact_groups', contactgroup_name, new, log=False)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.info(f'se renombro {frecuencia} hosts en {cons.ORIG_HST}', extra=cons.EXTRA)
+            thos.aplicar_cambios(lista_hosts)
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, contactgroup_name)
+        contactgroup.rename_elemento(cons.ID_CGR, contactgroup_name, new, log=False)
+        logger.info(f'se renombro {contactgroup_name} con {new} en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        tcgr.aplicar_cambios(lista_contactgroups)
+    logger.info('finalizando renombrar_contactgroup', extra=cons.EXTRA)
 
 def copiar_contactgroup(lista_contactgroups, contactgroup, new):
     logger.info('iniciando copiar_contactgroup', extra=cons.EXTRA)

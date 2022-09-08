@@ -68,9 +68,9 @@ def get_host(datos,host, log=True):
     logger.error(f'no se encontro el host {host}, exit..', extra=cons.EXTRA)
     raise SystemExit(2)
 
-def get_list_dato_in_host(lista,atr,dato):
-    """Devuelve un iterable con todos los objetos Host que tengan el atributo atr y el elemento dato."""
-    return filter(lambda x: x.existe_elemento(atr,dato),lista)
+def get_parametro_in_host(datos, atributo, name):
+    """Devuelve un iterable con todos los objetos host a los que pertenece name."""
+    return filter(lambda x: x.existe_elemento(atributo, name), datos)
 
 def delete_host(datos,host):
     """Elimina las alarmas asociadas al host inidicado."""

@@ -36,7 +36,7 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
             if i == '' or i.startswith(('define','#')):
                 continue
             elif i.startswith('}'):
-                command.ordenar()
+                command.ordenar(rev=True)
                 if command.existe_atributo(cons.ID_CMD, log=False):
                     lista_command.append(command)
                 command = Command()
@@ -56,7 +56,7 @@ def _procesar(cad,char):
     else: val = char.join(lista)
     return [atr,val]
 
-def get_command(datos,command,log=False):
+def get_command(datos,command,log=True):
     """Retorna el objeto command."""
     for i in datos:
         if i.get_name() == command:

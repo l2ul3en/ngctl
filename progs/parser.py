@@ -9,7 +9,7 @@
 # Copyright:   (c) Personal 2020
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
-from sys import path, exit as kill
+from sys import path, argv
 path.append('/data/source/')
 import ngctl.acciones.caller as call
 import ngctl.config.constantes as cons
@@ -51,30 +51,30 @@ def status(name):
 def exec_servicio(args):
     status(exec_servicio.__name__)
     if args.show:
-        call.mostrar_alarma(lista_alarmas, args.service_name, args.host)
+        call.mostrar_alarma(lista_alarmas, args.service_description, args.host)
     elif args.rename != None:
-        call.renombrar_servicio(lista_alarmas, args.service_name, args.rename, args.host)
+        call.renombrar_servicio(lista_alarmas, args.service_description, args.rename, args.host)
     elif args.delete:
-        call.eliminar_alarma(lista_alarmas, args.service_name, args.host)
+        call.eliminar_alarma(lista_alarmas, args.service_description, args.host)
     elif args.copy != None:
-        call.copiar_servicio(lista_alarmas,args.service_name,args.copy, args.host)
+        call.copiar_servicio(lista_alarmas,args.service_description,args.copy, args.host)
     else: alarma.print_usage()
     status(exec_servicio.__name__)
 
 def exec_servicio_atrib(args):
     status(exec_servicio_atrib.__name__)
     if args.delete:
-        call.eliminar_atributo(lista_alarmas, args.service_name, args.atributo, args.host)
+        call.eliminar_atributo(lista_alarmas, args.service_description, args.atributo, args.host)
     elif args.get:
-        call.mostrar_atributo(lista_alarmas, args.service_name, args.atributo, args.host)
+        call.mostrar_atributo(lista_alarmas, args.service_description, args.atributo, args.host)
     elif args.modify != None:
-        call.modificar_atributo(lista_alarmas, args.service_name, args.atributo, args.modify, args.host)
+        call.modificar_atributo(lista_alarmas, args.service_description, args.atributo, args.modify, args.host)
     elif args.del_elemento != None:
-        call.eliminar_elemento(lista_alarmas, args.service_name, args.atributo, args.del_elemento, args.host)
+        call.eliminar_elemento(lista_alarmas, args.service_description, args.atributo, args.del_elemento, args.host)
     elif args.add_elemento != None:
-        call.agregar_elemento(lista_alarmas, args.service_name, args.atributo, args.add_elemento, args.host)
+        call.agregar_elemento(lista_alarmas, args.service_description, args.atributo, args.add_elemento, args.host)
     elif args.new != None:
-        call.agregar_parametro(lista_alarmas, args.service_name, args.atributo, args.new, args.host)
+        call.agregar_parametro(lista_alarmas, args.service_description, args.atributo, args.new, args.host)
     else: edit_alarm.print_usage()
     status(exec_servicio_atrib.__name__)
 
@@ -155,7 +155,7 @@ def exec_command(args):
     elif args.copy != None:
         call.copiar_command(lista_commands, args.command_name, args.copy)
     elif args.rename != None:
-        call.modificar_atributo_command(lista_commands, args.command_name, cons.ID_CMD, args.rename)
+        call.renombrar_command(lista_alarmas, lista_commands, args.command_name, args.rename)
     else: cmmd.print_usage()
     status(exec_command.__name__)
 
@@ -181,11 +181,11 @@ def exec_contactgroup(args):
     if args.show:
         call.mostrar_contactgroup(lista_contactgroups, args.contactgroup_name)
     elif args.delete:
-        call.eliminar_contactgroup(lista_contactgroups, args.contactgroup_name)
+        call.eliminar_contactgroup(lista_hosts, lista_alarmas, lista_contactgroups, args.contactgroup_name)
     elif args.copy != None:
         call.copiar_contactgroup(lista_contactgroups, args.contactgroup_name, args.copy)
     elif args.rename != None:
-        call.modificar_atributo_contactgroup(lista_contactgroups, args.contactgroup_name, cons.ID_CGR, args.rename)
+        call.renombrar_contactgroup(lista_alarmas, lista_hosts, lista_contactgroups, args.contactgroup_name, args.rename)
     else: cgrp.print_usage()
     status(exec_contactgroup.__name__)
 
@@ -211,11 +211,13 @@ def exec_contact(args):
     if args.show:
         call.mostrar_contact(lista_contacts, args.contact_name)
     elif args.delete:
-        call.eliminar_contact(lista_contacts, args.contact_name)
+        call.eliminar_contact(lista_contactgroups, lista_alarmas, lista_hosts, lista_contacts, args.contact_name)
+    elif args.groups:
+        call.mostrar_listado_contactgroup(lista_contacts, lista_contactgroups, args.contact_name)
     elif args.copy != None:
         call.copiar_contact(lista_contacts, args.contact_name, args.copy)
     elif args.rename != None:
-        call.modificar_atributo_contact(lista_contacts, args.contact_name, cons.ID_CNT, args.rename)
+        call.renombrar_contact(lista_contactgroups, lista_alarmas, lista_hosts, lista_contacts, args.contact_name, args.rename)
     else: cnts.print_usage()
     status(exec_contact.__name__)
 
@@ -334,7 +336,7 @@ def create_command():
     alarma.add_argument(cons.ID_SRV,help='nombre de alarma')
     group_alarma = alarma.add_mutually_exclusive_group()
     group_opc = alarma.add_mutually_exclusive_group()
-    group_alarma.add_argument('-c','--copy',metavar='NEW_HOST',help='copia service_name para NEW_HOST')
+    group_alarma.add_argument('-c','--copy',metavar='NEW_HOST',help=f'copia {cons.ID_SRV} para NEW_HOST')
     group_alarma.add_argument('-d', '--delete', action='store_true',default=False,help=f'elimina {cons.ID_SRV}')
     group_alarma.add_argument('-r', '--rename',metavar=f'NEW_{cons.ID_SRV.upper()}',help=f'cambia {cons.ID_SRV} con NEW_{cons.ID_SRV.upper()}')
     group_alarma.add_argument('-s', '--show', action='store_true',default=False,help=f'muestra la configuracion de {cons.ID_SRV}')
@@ -357,7 +359,7 @@ def create_command():
 
     # A hostname subcommand
     global host
-    host = subparsers.add_parser('hostname', aliases='h', help='Procesamiento a nivel de host')
+    host = subparsers.add_parser('host', aliases='h', help='Procesamiento a nivel de host')
     host.add_argument(cons.ID_HST, action='store',help='nombre de host')
     group_opc = host.add_mutually_exclusive_group()
     group_host = host.add_mutually_exclusive_group()
@@ -393,7 +395,7 @@ def create_command():
     group_cmd = cmmd.add_mutually_exclusive_group()
     group_cmd.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_CMD.upper()}', action='store', help=f'copia {cons.ID_CMD} para NEW_{cons.ID_CMD.upper()}')
     group_cmd.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CMD}')
-    group_cmd.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CMD.upper()}', action='store', help=f'cambia {cons.ID_CMD} con NEW_{cons.ID_CMD.upper()}')
+    group_cmd.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CMD.upper()}', action='store', help=f'cambia {cons.ID_CMD} con NEW_{cons.ID_CMD.upper()}; actualiza alarmas')
     group_cmd.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_CMD}')
     cmmd.set_defaults(func=exec_command)
 
@@ -417,8 +419,9 @@ def create_command():
     cnts.add_argument(cons.ID_CNT, action='store', help='usuario')
     group_cnt = cnts.add_mutually_exclusive_group()
     group_cnt.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_CNT.upper()}', action='store', help=f'copia {cons.ID_CNT} para NEW_{cons.ID_CNT.upper()}')
-    group_cnt.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CNT}')
-    group_cnt.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CNT.upper()}', action='store', help=f'cambia {cons.ID_CNT} con NEW_{cons.ID_CNT.upper()}')
+    group_cnt.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CNT}; desvincula contactgroups, alarmas, host')
+    group_cnt.add_argument('-G', '--groups', action='store_true', default=False, help=f'muestra los contactgroups asociados a {cons.ID_CNT}')
+    group_cnt.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CNT.upper()}', action='store', help=f'cambia {cons.ID_CNT} con NEW_{cons.ID_CNT.upper()}; actualiza contactgroups, alarmas, hosts')
     group_cnt.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_CNT}')
     cnts.set_defaults(func=exec_contact)
 
@@ -442,8 +445,8 @@ def create_command():
     cgrp.add_argument(cons.ID_CGR, action='store', help='nombre de contactgroup')
     group_cgr = cgrp.add_mutually_exclusive_group()
     group_cgr.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_CGR.upper()}', action='store', help=f'copia {cons.ID_CGR} para NEW_{cons.ID_CGR.upper()}')
-    group_cgr.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CGR}')
-    group_cgr.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CGR.upper()}', action='store', help=f'cambia {cons.ID_CGR} con NEW_{cons.ID_CGR.upper()}')
+    group_cgr.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_CGR}; desvincula alarmas, hosts')
+    group_cgr.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_CGR.upper()}', action='store', help=f'cambia {cons.ID_CGR} con NEW_{cons.ID_CGR.upper()}; actualiza alarmas, hosts')
     group_cgr.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_CGR}')
     cgrp.set_defaults(func=exec_contactgroup)
 
@@ -466,4 +469,6 @@ def create_command():
     args.func(args)
 
 if __name__ == '__main__':
+    if len(argv) == 1:
+        argv.append('-h')
     create_command()

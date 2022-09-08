@@ -133,7 +133,7 @@ _get_cant_opciones_contact(){
     until [[ $i -ge ${#COMP_WORDS[@]} ]] || [[ ${COMP_WORDS[i]} == edit ]]; do
         case ${COMP_WORDS[i]} in
             --copy|--rename|-r|-c) con_parametro=$(($con_parametro+1)); i=$(($i+1));;
-            --delete|--show|-d|-s|-h|--help) boleano=$(($boleano+1));;
+            --delete|--show|-d|-s|-h|--help|-G|--groups) boleano=$(($boleano+1));;
             '') : ;;
             *) sin_parametro=$(($sin_parametro+1)) ;;
         esac
@@ -170,7 +170,7 @@ _nagiosctl(){
 		search\
 		group\
 		service\
-		hostname\
+		host\
 		export\
 		command\
 		contact\
@@ -200,7 +200,7 @@ _nagiosctl(){
 		-s --show\
 		--host"
 
-	HOSTNAME_OPTIONS="\
+	HOST_OPTIONS="\
 		-h --help\
 		-l --list\
 		-c --copy\
@@ -235,7 +235,14 @@ _nagiosctl(){
 		-r --rename\
 		-s --show"
 
-	CONTACT_OPTIONS=$COMMAND_OPTIONS
+	CONTACT_OPTIONS="\
+		-h --help\
+		-c --copy\
+		-d --delete\
+		-G --groups\
+		-r --rename\
+		-s --show"
+
 	CONTACTGROUP_OPTIONS=$COMMAND_OPTIONS
 
 	OBJETOS='alarma host grupo command contact contactgroup'
@@ -345,7 +352,7 @@ _nagiosctl(){
 			fi
 
 			;;
-		hostname)
+		host)
 			local exist_edit exist_ip exist_host exist_edit_name cant_opc_host cant_opc_edit param_total 
 			exist_edit=$(_get_frec 'edit')
 			exist_ip=$(_get_frec '--ip')
@@ -375,13 +382,13 @@ _nagiosctl(){
 #				echo "edit_param=$cant_opc_edit, atributo-name=$exist_edit_name, tam_real=$tam_real, total=$param_total" >> ~/compl.log
 			fi
 
-			if [[ ($exist_edit -eq 0) && ($prev != hostname ) && (($cant_opc_host -eq 0) && ($exist_host -eq 1) && ($param_total -eq $tam_real)) && ($tam -ge 4) && ($cur != -* ) ]]; then
+			if [[ ($exist_edit -eq 0) && ($prev != host ) && (($cant_opc_host -eq 0) && ($exist_host -eq 1) && ($param_total -eq $tam_real)) && ($tam -ge 4) && ($cur != -* ) ]]; then
 
 				COMPREPLY=( $(compgen -W "edit" -- $cur) ); return 0
 
 			elif [[ ($exist_edit -eq 0) && (($tam -ge 3) && ($tam -le 6)) ]]; then
 
-				complete_options=$HOSTNAME_OPTIONS
+				complete_options=$HOST_OPTIONS
 
 			elif [[ ((($exist_edit -eq 1) && ($exist_ip -eq 1)) && (($tam -ge 7) && ($tam -le 10)) && ($prev != -* ) && (($cant_opc_edit -le 1) && ($exist_edit_name -le 2) && ($param_total -eq $tam_real))) || ( (($exist_edit -eq 1) && ($exist_ip -eq 0)) && (($tam -ge 5) && ($tam -le 7 )) && ($prev != -* ) && (($cant_opc_edit -le 1) && ($exist_edit_name -le 2) && ($param_total -eq $tam_real))) ]]; then
 

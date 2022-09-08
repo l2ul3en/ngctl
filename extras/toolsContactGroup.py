@@ -56,6 +56,10 @@ def _procesar(cad,char):
     else: val = char.join(lista)
     return [atr,val]
 
+def get_parametro_in_contactgroup(datos,atributo, name):
+    """Devuelve un iterable con todos los objetos contactgroup a los que pertenece name."""
+    return filter(lambda x: x.existe_elemento(atributo, name), datos)
+
 def get_contactgroup(datos,contactgroup,log=True):
     """Retorna el objeto contactgroup."""
     for i in datos:

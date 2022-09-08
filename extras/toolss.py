@@ -55,6 +55,10 @@ def _procesar(cad,char):
     else: val = char.join(lista)
     return [atr,val]
 
+def get_parametro_in_alarma(datos,atributo, name, sep=','):
+    """Devuelve un iterable con todos los objetos alarma a los que pertenece name."""
+    return filter(lambda x: x.existe_elemento(atributo, name, sep), datos)
+
 def get_alarmas(datos):
     """Devuelve una lista con todos los nombres de hosts."""
     return [x.get_name() for x in datos if x.get_tipo() == 'define host{']
@@ -192,8 +196,8 @@ def rename_host(datos, host, new):
     for i in range(len(datos)):
         if datos[i].get_host() == host and datos[i].get_tipo() == 'define service{':
             srv = datos[i].get_name().replace(host,new)
-            datos[i].add_valor(cons.SRV, srv)
-            datos[i].add_valor(cons.HST, new)
+            datos[i].add_valor(cons.ID_SRV, srv)
+            datos[i].add_valor(cons.ID_HST, new)
             logger.info(f'se renombro {host} a {new} en {cons.ORIG_SRV}', extra=cons.EXTRA)
 
 def get_cantidad(datos):
