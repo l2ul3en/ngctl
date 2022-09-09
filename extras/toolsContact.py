@@ -32,6 +32,8 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
     contact = Contact()
     with open (cons.DIR + cons.ORIG_CNT,'r') as f:
         for i in f:
+            char = i.find(';')
+            if char != -1: i = i[:char]
             i = i.strip()
             if i == '' or i.startswith(('define','#')):
                 continue

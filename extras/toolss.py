@@ -30,6 +30,8 @@ def cargar():
     regex = re.compile(r'\s+')
     with open (cons.DIR + cons.ORIG_SRV ,'r') as f:
         for i in f:
+            char = i.find(';')
+            if char != -1: i = i[:char]
             i = i.strip()
             if i == '' or i.startswith('#'):
                 continue
