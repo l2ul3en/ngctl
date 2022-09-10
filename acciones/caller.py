@@ -11,6 +11,7 @@ import ngctl.extras.toolsg as thgr
 import ngctl.extras.toolsCommand as tcmd
 import ngctl.extras.toolsContact as tcnt
 import ngctl.extras.toolsContactGroup as tcgr
+import ngctl.extras.toolsTimeperiod as ttpe
 import ngctl.clases #necesario para modulo search y export
 import logging, logging.config, re, csv
 from subprocess import getoutput as geto
@@ -481,8 +482,10 @@ def _get_id_objeto(obj):
         return cons.ID_CMD
     elif isinstance(obj, ngctl.clases.Contact.Contact):
         return cons.ID_CNT
-    else:
+    elif isinstance(obj, ngctl.clases.ContactGroup.ContactGroup):
         return cons.ID_CGR
+    else:
+        return cons.ID_TPE
     
 def search_atributo(lista, regex, atributo=None, show_name=False):
     logger.info('iniciando search_atributo', extra=cons.EXTRA)
@@ -509,8 +512,10 @@ def _get_objeto(lista, name):
         return tcmd.get_command(lista, name, log=False)
     elif isinstance(lista[0], ngctl.clases.Contact.Contact):
         return tcnt.get_contact(lista, name, log=False)
-    else:
+    elif isinstance(lista[0], ngctl.clases.ContactGroup.ContactGroup):
         return tcgr.get_contactgroup(lista, name, log=False)
+    else:
+        return ttpe.get_timeperiod(lista, name, log=False)
 
 def generar_reporte(lista, file_in, file_out, separador_out=',', *atributos):
     logger.info('iniciando generar_reporte', extra=cons.EXTRA)
@@ -555,7 +560,7 @@ def renombrar_command(lista_alarmas, lista_commands, command_name, new):
     if not tcmd.existe_command(lista_commands, command_name):
         logger.warning(f'no existe definicion de {command_name} en {cons.ORIG_CMD}', extra=cons.EXTRA)
     elif tcmd.existe_command(lista_commands, new):
-        logger.warning(f'el contact {new} ya existe en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        logger.warning(f'el contact {new} ya existe en {cons.ORIG_CMD}', extra=cons.EXTRA)
     else:
         frecuencia = 0
         for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'check_command', command_name, sep='!'):
@@ -568,7 +573,7 @@ def renombrar_command(lista_alarmas, lista_commands, command_name, new):
         command.rename_elemento(cons.ID_CMD, command_name, new, log=False)
         logger.info(f'se renombro {command_name} con {new} en {cons.ORIG_CMD}', extra=cons.EXTRA)
         tcmd.aplicar_cambios(lista_commands)
-    logger.info('finalizando renombrar_contact', extra=cons.EXTRA)
+    logger.info('finalizando renombrar_command', extra=cons.EXTRA)
 
 def copiar_command(lista_commands, command, new):
     logger.info('iniciando copiar_command', extra=cons.EXTRA)
@@ -981,6 +986,143 @@ def agregar_parametro_contactgroup(lista_contactgroups, name, atributo, valor):
             tcgr.aplicar_cambios(lista_contactgroups)
         else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
     logger.info('finalizando agregar_parametro_contactgroup', extra=cons.EXTRA)
+
+#Funciones para timeperiods
+
+def cargar_timeperiods():
+    return ttpe.cargar()
+
+def mostrar_timeperiod(lista, timeperiod):
+    logger.info('iniciando mostrar_timeperiod', extra=cons.EXTRA)
+    if ttpe.existe_timeperiod(lista, timeperiod):
+        ttpe.show_timeperiod(lista,timeperiod)
+        logger.info(f'se visualizo {timeperiod}', extra=cons.EXTRA)
+    else: logger.warning(f'no se encontro el timeperiod {timeperiod} definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_timeperiod', extra=cons.EXTRA)
+
+def eliminar_timeperiod(lista_timeperiods, timeperiod_name):
+    logger.info('iniciando eliminar_timeperiod', extra=cons.EXTRA)
+    if ttpe.existe_timeperiod(lista_timeperiods, timeperiod_name):
+        ttpe.delete_timeperiod(lista_timeperiods, timeperiod_name)
+        ttpe.aplicar_cambios(lista_timeperiods)
+    else: logger.warning(f'el timeperiod {timeperiod} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_timeperiod', extra=cons.EXTRA)
+
+def renombrar_timeperiod(lista_alarmas, lista_timeperiods, timeperiod_name, new):
+    logger.info('iniciando renombrar_timeperiod', extra=cons.EXTRA)
+    if not ttpe.existe_timeperiod(lista_timeperiods, timeperiod_name):
+        logger.warning(f'no existe definicion de {timeperiod_name} en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    elif ttpe.existe_timeperiod(lista_timeperiods, new):
+        logger.warning(f'el contact {new} ya existe en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        frecuencia = 0
+        for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'check_period', timeperiod_name):
+            alarma.add_valor('check_period', new)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.info(f'se renombro {frecuencia} check_period en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            tser.aplicar_cambios(lista_alarmas)
+        frecuencia = 0
+        for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'notification_period', timeperiod_name):
+            alarma.add_valor('notification_period', new)
+            frecuencia += 1
+        if frecuencia > 0:
+            logger.info(f'se renombro {frecuencia} notification_period en {cons.ORIG_SRV}', extra=cons.EXTRA)
+            tser.aplicar_cambios(lista_alarmas)
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, timeperiod_name)
+        timeperiod.add_valor(cons.ID_TPE, new)
+        logger.info(f'se renombro {timeperiod_name} con {new} en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        ttpe.aplicar_cambios(lista_timeperiods)
+    logger.info('finalizando renombrar_timeperiod', extra=cons.EXTRA)
+
+def copiar_timeperiod(lista_timeperiods, timeperiod, new):
+    logger.info('iniciando copiar_timeperiod', extra=cons.EXTRA)
+    if ttpe.existe_timeperiod(lista_timeperiods, timeperiod):
+        if not ttpe.existe_timeperiod(lista_timeperiods, new):
+            ttpe.copy_timeperiod(lista_timeperiods, timeperiod, new)
+            ttpe.aplicar_cambios(lista_timeperiods)
+        else: logger.warning(f'el timeperiod {new} ya existe en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else: logger.warning(f'el timeperiod {timeperiod} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    logger.info('finalizando copiar_timeperiod', extra=cons.EXTRA)
+
+def modificar_atributo_timeperiod(lista_timeperiods, name, atributo, new):
+    logger.info('iniciando modificar_atributo_timeperiod', extra=cons.EXTRA)
+    if not ttpe.existe_timeperiod(lista_timeperiods, name):
+        logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        if timeperiod.existe_atributo(atributo):
+            timeperiod.add_valor(atributo,new)
+            ttpe.aplicar_cambios(lista_timeperiods)
+        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+    logger.info('finalizando modificar_atributo_timeperiod', extra=cons.EXTRA)
+
+def eliminar_atributo_timeperiod(lista_timeperiods, name, atributo):
+    logger.info('iniciando eliminar_atributo_timeperiod', extra=cons.EXTRA)
+    if not ttpe.existe_timeperiod(lista_timeperiods, name):
+        logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        if timeperiod.existe_atributo(atributo):
+            timeperiod.del_parametro(atributo)
+            ttpe.aplicar_cambios(lista_timeperiods)
+        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_atributo_timeperiod', extra=cons.EXTRA)
+
+def mostrar_atributo_timeperiod(lista_timeperiods, name, atributo):
+    logger.info('iniciando mostrar_atributo_timeperiod', extra=cons.EXTRA)
+    if not ttpe.existe_timeperiod(lista_timeperiods, name):
+        logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        if timeperiod.existe_atributo(atributo):
+            print(timeperiod.get_valor(atributo))
+        else: logger.warning(f'no existe el timeperiod {name}', extra=cons.EXTRA)
+    logger.info('finalizando mostrar_atributo_timeperiod', extra=cons.EXTRA)
+
+def eliminar_elemento_timeperiod(lista_timeperiods, name, atributo, dato): #solo se puede eliminar un elem a la vez
+    logger.info('iniciando eliminar_elemento_timeperiod', extra=cons.EXTRA)
+    if not ttpe.existe_timeperiod(lista_timeperiods, name):
+        logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        if timeperiod.existe_atributo(atributo):
+            if timeperiod.existe_elemento(atributo, dato):
+                timeperiod.del_elemento(atributo, dato)
+                ttpe.aplicar_cambios(lista_timeperiods)
+            else: logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
+        else: logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+    logger.info('finalizando eliminar_elemento_timeperiod', extra=cons.EXTRA)
+
+def agregar_elemento_timeperiod(lista_timeperiods, name, atributo, dato): #puede add varios elems separados x , Ej w,c,r
+    logger.info('iniciando agregar_elemento_timeperiod', extra=cons.EXTRA)
+    if not ttpe.existe_timeperiod(lista_timeperiods, name):
+        logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        if timeperiod.existe_atributo(atributo):
+            if not timeperiod.existe_elemento(atributo, dato):
+                timeperiod.add_elemento(atributo, dato)
+                ttpe.aplicar_cambios(lista_timeperiods)
+            else: logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+        else:
+            timeperiod.add_parametro([atributo, dato])
+            logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
+            ttpe.aplicar_cambios(lista_timeperiods)
+    logger.info('finalizando agregar_elemento_timeperiod', extra=cons.EXTRA)
+
+def agregar_parametro_timeperiod(lista_timeperiods, name, atributo, valor):
+    logger.info('iniciando agregar_parametro_timeperiod', extra=cons.EXTRA)
+    if not ttpe.existe_timeperiod(lista_timeperiods, name):
+        logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        if not timeperiod.existe_atributo(atributo):
+            timeperiod.add_parametro([atributo,valor])
+            logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
+            ttpe.aplicar_cambios(lista_timeperiods)
+        else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+    logger.info('finalizando agregar_parametro_timeperiod', extra=cons.EXTRA)
 
 if __name__ == '__main__':
     pass

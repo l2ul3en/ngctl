@@ -24,12 +24,14 @@ lista_grupos = call.cargar_hostgroups()
 lista_commands = call.cargar_commands()
 lista_contacts = call.cargar_contacts()
 lista_contactgroups = call.cargar_contactgroups()
+lista_timeperiods = call.cargar_timeperiods()
 lista_alarmas.sort()
 lista_hosts.sort()
 lista_grupos.sort()
 lista_commands.sort()
 lista_contacts.sort()
 lista_contactgroups.sort()
+lista_timeperiods.sort()
 
 def validar_formato_ip(ip):
     aux = [int(i) for i in ip.split('.')]
@@ -44,8 +46,9 @@ def validar_longitud_sep(sep):
     return sep
 
 def status(name):
-    logger.info(f'{name} [alarmas/hosts/grupos/commands/contacts/contactgroups] [\
-{call.get_cantidad_alarmas(lista_alarmas)}/{call.get_cantidad_hosts(lista_hosts)}/{len(lista_grupos)}/{len(lista_commands)}/{len(lista_contacts)}/{len(lista_contactgroups)}\
+    logger.info(f'{name} [alarmas/hosts/grupos/contacts/contactgroups/timeperiods/commands] [\
+{call.get_cantidad_alarmas(lista_alarmas)}/{call.get_cantidad_hosts(lista_hosts)}/{len(lista_grupos)}/\
+{len(lista_contacts)}/{len(lista_contactgroups)}/{len(lista_timeperiods)}/{len(lista_commands)}\
 ]', extra=cons.EXTRA)
 
 def exec_servicio(args):
@@ -238,6 +241,36 @@ def exec_contact_atrib(args):
     else: edit_cnt.print_usage()
     status(exec_contact_atrib.__name__)
 
+def exec_timeperiod(args):
+    status(exec_timeperiod.__name__)
+    if args.show:
+        call.mostrar_timeperiod(lista_timeperiods, args.timeperiod_name)
+    elif args.delete:
+        call.eliminar_timeperiod(lista_timeperiods, args.timeperiod_name)
+    elif args.copy != None:
+        call.copiar_timeperiod(lista_timeperiods, args.timeperiod_name, args.copy)
+    elif args.rename != None:
+        call.renombrar_timeperiod(lista_alarmas, lista_timeperiods, args.timeperiod_name, args.rename)
+    else: tmpe.print_usage()
+    status(exec_timeperiod.__name__)
+
+def exec_timeperiod_atrib(args):
+    status(exec_timeperiod_atrib.__name__)
+    if args.delete:
+        call.eliminar_atributo_timeperiod(lista_timeperiods, args.timeperiod_name, args.atributo)
+    elif args.get:
+        call.mostrar_atributo_timeperiod(lista_timeperiods, args.timeperiod_name, args.atributo)
+    elif args.modify != None:
+        call.modificar_atributo_timeperiod(lista_timeperiods, args.timeperiod_name, args.atributo, args.modify)
+    elif args.del_elemento != None:
+        call.eliminar_elemento_timeperiod(lista_timeperiods, args.timeperiod_name, args.atributo, args.del_elemento)
+    elif args.add_elemento != None:
+        call.agregar_elemento_timeperiod(lista_timeperiods, args.timeperiod_name, args.atributo, args.add_elemento)
+    elif args.new != None:
+        call.agregar_parametro_timeperiod(lista_timeperiods, args.timeperiod_name, args.atributo, args.new)
+    else: edit_tpe.print_usage()
+    status(exec_timeperiod_atrib.__name__)
+
 def _get_lista_objetos(tipo):
     if tipo == 'alarma':
         return lista_alarmas
@@ -249,8 +282,10 @@ def _get_lista_objetos(tipo):
         return lista_commands
     elif tipo == 'contact':
         return lista_contacts
-    else: 
+    elif tipo == 'contactgroup':
         return lista_contactgroups
+    else: 
+        return lista_timeperiods
 
 def exec_search(args):
     status(exec_search.__name__)
@@ -284,7 +319,7 @@ def create_command():
     global parser
     parser = argparse.ArgumentParser(description='nagiosctl es usado para procesar objetos de configuracion nagios de manera modular.')
     subparsers = parser.add_subparsers()
-    tipos_objetos = ['alarma','host','grupo','command','contact','contactgroup']
+    tipos_objetos = ['alarma','host','grupo','command','contact','contactgroup', 'timeperiod']
     #An export subcommand
     global export
     export = subparsers.add_parser('export', aliases='e', help='Exportar a salida personalizada')
@@ -463,6 +498,31 @@ def create_command():
     group_edit_cgr.add_argument('-n','--new',metavar='VALOR',help='agrega VALOR a atributo')
     group_edit_cgr.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en atributo')
     edit_cgr.set_defaults(func=exec_contactgroup_atrib)
+
+    #A timeperiod subcommand
+    global tmpe 
+    tmpe = subparsers.add_parser('timeperiod', aliases='t', help='Procesamiento a nivel de timeperiod')
+    tmpe.add_argument(cons.ID_TPE, action='store', help='nombre de timeperiod')
+    group_tpe = tmpe.add_mutually_exclusive_group()
+    group_tpe.add_argument('-c','--copy', metavar=f'NEW_{cons.ID_TPE.upper()}', action='store', help=f'copia {cons.ID_TPE} para NEW_{cons.ID_TPE.upper()}')
+    group_tpe.add_argument('-d', '--delete', action='store_true', default=False, help=f'elimina {cons.ID_TPE}')
+    group_tpe.add_argument('-r', '--rename', metavar=f'NEW_{cons.ID_TPE.upper()}', action='store', help=f'cambia {cons.ID_TPE} con NEW_{cons.ID_TPE.upper()}; actualiza alarmas')
+    group_tpe.add_argument('-s', '--show', action='store_true', default=False, help=f'muestra la configuracion de {cons.ID_TPE}')
+    tmpe.set_defaults(func=exec_timeperiod)
+
+    #An edit timeperiod subcomand
+    sub_tmpe = tmpe.add_subparsers()
+    global edit_tpe
+    edit_tpe = sub_tmpe.add_parser('edit', aliases='e', help='Procesamiento a nivel de atributo')
+    edit_tpe.add_argument('atributo',help=f'nombre del atributo {cons.ID_TPE}')
+    group_edit_tpe = edit_tpe.add_mutually_exclusive_group()
+    group_edit_tpe.add_argument('-a','--add-elemento',dest='add_elemento',metavar='ELEMENTO',help='añade a ELEMENTO en atributo; si no existe el ATRIBUTO lo agrega')
+    group_edit_tpe.add_argument('-d', '--delete', action='store_true',default=False,help='elimina atributo')
+    group_edit_tpe.add_argument('-g', '--get', action='store_true',default=False,help='muestra el VALOR del ATRIBUTO')
+    group_edit_tpe.add_argument('-m','--modify',metavar='VALOR',help='asigna VALOR a atributo')
+    group_edit_tpe.add_argument('-n','--new',metavar='VALOR',help='agrega VALOR a atributo')
+    group_edit_tpe.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en atributo')
+    edit_tpe.set_defaults(func=exec_timeperiod_atrib)
 
     args = parser.parse_args()
     #print(args)

@@ -157,6 +157,21 @@ _get_cant_opciones_contactgroup(){
     echo $boleano $con_parametro $sin_parametro
 }
 
+_get_cant_opciones_timeperiod(){
+#Retorna un array por tipo (booleano, con/sin parametro) de la cantidad de las opciones del modulo timeperiod
+    local con_parametro=0; local boleano=0; local sin_parametro=0; local i=2
+    until [[ $i -ge ${#COMP_WORDS[@]} ]] || [[ ${COMP_WORDS[i]} == edit ]]; do
+        case ${COMP_WORDS[i]} in
+            --copy|--rename|-r|-c) con_parametro=$(($con_parametro+1)); i=$(($i+1));;
+            --delete|--show|-d|-s|-h|--help) boleano=$(($boleano+1));;
+            '') : ;;
+            *) sin_parametro=$(($sin_parametro+1)) ;;
+        esac
+        i=$(($i+1))
+    done
+    echo $boleano $con_parametro $sin_parametro
+}
+
 _nagiosctl(){
 	local cur prev complete_options complete_words tam firstword lastword
 	COMPREPLY=()
@@ -174,7 +189,8 @@ _nagiosctl(){
 		export\
 		command\
 		contact\
-		contactgroup"
+		contactgroup\
+		timeperiod"
 
 	GLOBAL_OPTIONS="-h --help"
 
@@ -244,8 +260,9 @@ _nagiosctl(){
 		-s --show"
 
 	CONTACTGROUP_OPTIONS=$COMMAND_OPTIONS
+	TIMEPERIOD_OPTIONS=$COMMAND_OPTIONS
 
-	OBJETOS='alarma host grupo command contact contactgroup'
+	OBJETOS='alarma host grupo command contact contactgroup timeperiod'
 
 	#Un-comment this for debug purposes:
 	#echo -e "prev = $prev, cur = $cur, firstword = $firstword, lastword = $lastword, len = $tam" >> /home/manfred/compl.log
@@ -509,6 +526,43 @@ _nagiosctl(){
 			fi
 			;;
 
+		timeperiod)
+			local exist_tpe cant_opc_tpe
+			local exist_edit exist_edit_name cant_opc_edit param_total e_bool e_con_para e_sin_para tam_real lista arr
+			exist_edit=$(_get_frec 'edit')
+			lista=($(_get_cant_opciones_timeperiod))
+#			echo "group: ${lista[@]}" >> ~/compl.log
+			booleano=${lista[0]}
+			con_parametro=${lista[1]}
+			sin_parametro=${lista[2]}
+			tam_real=$(_get_tam)
+			exist_tpe=$sin_parametro
+			cant_opc_tpe=$(($booleano+$con_parametro))
+			param_total=$(( $booleano+$sin_parametro+2+($con_parametro*2) ))
+#			echo "par=$con_parametro, bol=$booleano, arg-posic=$sin_parametro, tam_real=$tam_real, total=$param_total" >> ~/compl.log
+			if [[ $exist_edit -eq 1 ]]; then
+				arr=($(_get_cant_opciones_edit))
+#				echo "edit: ${arr[@]}" >> ~/compl.log
+				e_bool=${arr[0]}
+				e_con_para=${arr[1]}
+				e_sin_para=${arr[2]}
+				tam_real=$(_get_tam)
+				exist_edit_name=$e_sin_para
+				cant_opc_edit=$(($e_bool+$e_con_para))
+				param_total=$(( $param_total+1+$e_bool+$e_sin_para+($e_con_para*2) ))
+#				echo "edit_param=$cant_opc_edit, atributo-name=$exist_edit_name, tam_real=$tam_real, total=$param_total" >> ~/compl.log
+			fi
+			if [[ ($exist_edit -eq 0 ) && ($prev != timeperiod ) && (($cant_opc_tpe -le 1) && ($exist_tpe -eq 1) && ($param_total -eq $tam_real)) && ($tam -eq 4) && ($cur != -* ) ]]; then
+				COMPREPLY=( $(compgen -W "edit" -- $cur) ); return 0
+			elif [[ ($exist_edit -eq 0 ) && ($tam -lt 5) ]]; then
+				complete_options=$TIMEPERIOD_OPTIONS
+			elif [[ ($exist_edit -eq 1) && (($tam -ge 5) && ($tam -le 6)) && ($prev != -* ) && (($cant_opc_edit -le 1) && ($exist_edit_name -le 2) && ($param_total -eq $tam_real)) ]]; then
+				complete_options=$EDIT_OPTIONS
+			else
+				return 0
+			fi
+			;;
+
 		*)
 			if [[ $tam -eq 2 ]]; then	
 				complete_words="$GLOBAL_MODULE"
@@ -517,6 +571,7 @@ _nagiosctl(){
 				return 0
 			fi
 			;;
+
 	esac
 	
 # Either display words or options, depending on the user input
