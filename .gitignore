@@ -9,3 +9,4 @@ config/__pycache__/
 extras/*.swp
 extras/__pycache__/
 progs/__pycache__/
+.vscode/

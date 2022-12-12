@@ -13,7 +13,7 @@ import ngctl.extras.toolsContact as tcnt
 import ngctl.extras.toolsContactGroup as tcgr
 import ngctl.extras.toolsTimeperiod as ttpe
 import ngctl.clases #necesario para modulo search y export
-import logging, logging.config, re, csv
+import logging, logging.config, re, csv, errno
 from subprocess import getoutput as geto
 
 logging.config.fileConfig(cons.LOG_CONF)
@@ -164,9 +164,12 @@ def mostrar_listado_servicios(lalarmas, lhosts, host):
     logger.info('iniciando mostrar_listado_servicios', extra=cons.EXTRA)
     if thos.existe_host(lhosts,host):
         c = 0
-        for i in tser.get_listado_alarmas(lalarmas,host):
-            print(i)
-            c += 1
+        try:
+            for i in tser.get_listado_alarmas(lalarmas,host):
+                print(i)
+                c += 1
+        except IOError as e:
+            if e.errno == errno.EPIPE: pass
         logger.info(f'se visualizo {c} alarmas asociadas al host {host}', extra=cons.EXTRA) 
     else:
         logger.warning(f'{host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
@@ -381,12 +384,15 @@ def mostrar_listado_hosts(lhostgroups, grupo):
     logger.info('iniciando mostrar_listado_hosts', extra=cons.EXTRA)
     hostgroup = thgr.get_hostgroup(lhostgroups,grupo)
     if hostgroup.existe_atributo('members'):
-        for i in thgr.get_listado_hosts(lhostgroups,grupo):
-            c = 0
-            for j in i.split(','):
-                print(j)
-                c += 1
-            logger.info(f'se visualizo {c} hosts asociados al grupo {grupo}', extra=cons.EXTRA)
+        try:
+            for i in thgr.get_listado_hosts(lhostgroups,grupo):
+                c = 0
+                for j in i.split(','):
+                    print(j)
+                    c += 1
+                logger.info(f'se visualizo {c} hosts asociados al grupo {grupo}', extra=cons.EXTRA)
+        except IOError as e:
+            if e.errno == errno.EPIPE: pass
     else: logger.warning(f'no existe el atributo members en el grupo {hostgroup.get_name()}', extra=cons.EXTRA)
     logger.info('finalizando mostrar_listado_hosts', extra=cons.EXTRA)
 
@@ -494,9 +500,13 @@ def search_atributo(lista, regex, atributo=None, show_name=False):
     else: aux = atributo
     out = [ x for x in lista if filtro.search(str(x.get_valor(aux))) ]
     logger.info(f'se encontraron {len(out)} coincidencias para el patron {filtro.pattern!r} en {aux}', extra=cons.EXTRA)
-    for i in out:
-        if show_name: print(i.get_name())
-        else: print(i.get_valor(aux))
+    try:
+        for i in out:
+            if show_name: print(i.get_name())
+            else: print(i.get_valor(aux))
+    except IOError as e:
+        if e.errno == errno.EPIPE:
+            pass
     logger.info('finalizando search_atributo', extra=cons.EXTRA)
 
 #export
@@ -521,16 +531,20 @@ def generar_reporte(lista, file_in, file_out, separador_out=',', *atributos):
     logger.info('iniciando generar_reporte', extra=cons.EXTRA)
     writer = csv.DictWriter(file_out, fieldnames=atributos, delimiter=separador_out)
     writer.writeheader()
-    for i in file_in:
-        i = i.strip()
-        if i != '':
-            obj = _get_objeto(lista, i)
-            data_row = {}
-            for atributo in atributos:
-                if obj.existe_atributo(atributo, log=False):
-                    data_row[atributo] = obj.get_valor(atributo)
-            writer.writerow(data_row)
-            del data_row
+    try:
+        for i in file_in:
+            i = i.strip()
+            if i != '':
+                obj = _get_objeto(lista, i)
+                data_row = {}
+                for atributo in atributos:
+                    if obj.existe_atributo(atributo, log=False):
+                        data_row[atributo] = obj.get_valor(atributo)
+                writer.writerow(data_row)
+                del data_row
+    except IOError as e:
+        if e.errno == errno.EPIPE:
+            pass
     logger.info(f'Se exportaron {len(lista)} registros a {getattr(file_out, "name")}', extra=cons.EXTRA)
     logger.info('finalizando generar_reporte', extra=cons.EXTRA)
 
@@ -750,9 +764,12 @@ def mostrar_listado_contactgroup(lista_contacts, lista_contactgroups, contact_na
     logger.info('iniciando mostrar_listado_contactgroup', extra=cons.EXTRA)
     if tcnt.existe_contact(lista_contacts, contact_name):
         frecuencia = 0
-        for contactgroup in tcgr.get_parametro_in_contactgroup(lista_contactgroups, 'members', contact_name):
-            print (contactgroup.get_name())
-            frecuencia += 1
+        try:
+            for contactgroup in tcgr.get_parametro_in_contactgroup(lista_contactgroups, 'members', contact_name):
+                print (contactgroup.get_name())
+                frecuencia += 1
+        except IOError as e:
+            if e.errno == errno.EPIPE: pass
         logger.info(f'se visualizo {frecuencia} contactgroups asociados al contact {contact_name}', extra=cons.EXTRA)
     else: logger.warning(f'el contact {contact_name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
     logger.info('finalizando mostrar_listado_contactgroup', extra=cons.EXTRA)
