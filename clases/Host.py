@@ -28,7 +28,7 @@ class Host(Body):
         return self.__tipo + '\n' + super().__str__() + '}'
 
     def get_name(self):
-        return super().get_valor('host_name')
+        return super().get_valor(cons.ID_HST)
 
     def add_tipo(self,tipo):
         self.__tipo += tipo

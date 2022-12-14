@@ -31,10 +31,10 @@ class Alarma(Body):
         return self.__id
 
     def get_name(self):
-        return super().get_valor('service_description')
+        return super().get_valor(cons.ID_SRV)
 
     def get_host(self):
-        return super().get_valor('host_name')
+        return super().get_valor(cons.ID_HST)
 
     def add_tipo(self,tipo):
         self.__tipo += tipo

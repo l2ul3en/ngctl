@@ -2,8 +2,8 @@
 #-------------------------------------------------------------------------------
 # Purpose:     Invocar funciones que realicen tareas especificas
 #-------------------------------------------------------------------------------
-from sys import path
-path.append('../../')
+import sys
+sys.path.append('../../')
 import ngctl.config.constantes as cons
 import ngctl.extras.toolss as tser
 import ngctl.extras.toolsh as thos
@@ -27,7 +27,7 @@ def get_cantidad_alarmas(datos):
 
 def renombrar_servicio(lalarmas, old, new, host=None):
     modificar_atributo(lalarmas, old, cons.ID_SRV, new, host)
-  
+
 def modificar_atributo(lista, key, atributo, new, host=None):
     logger.info('iniciando modificar_atributo', extra=cons.EXTRA)
     if not tser.existe_alarma(lista, key, host):
@@ -180,7 +180,11 @@ def reporte_host(lalarmas, lhosts, host, verbose):
     if thos.existe_host(lhosts, host):
         frec = tser.get_frec_host(lalarmas, host)
         if verbose:
-            tser.show_alarma_host(lalarmas, host)
+            try:
+                tser.show_alarma_host(lalarmas, host)
+            except IOError as e:
+                if e.errno == errno.EPIPE: 
+                    sys.stderr.close()
         logger.info(f'se tiene {frec} alarmas configuradas para el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         print(f'se tiene {frec} alarmas configuradas para el host {host} en {cons.ORIG_SRV}')
     else: logger.warning(f'no existe definicion de {host} en {cons.ORIG_HST}', extra=cons.EXTRA)

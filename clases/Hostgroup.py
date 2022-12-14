@@ -27,7 +27,7 @@ class Hostgroup(Body):
         return 'define hostgroup{' + '\n' + super().__str__() + '}'
 
     def get_name(self):
-        return super().get_valor('hostgroup_name')
+        return super().get_valor(cons.ID_HGR)
 
     def __eq__(self, other):
         return self.get_name() == other.get_name()
