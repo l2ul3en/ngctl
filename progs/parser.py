@@ -13,6 +13,7 @@ from sys import path, argv
 path.append('/data/source/')
 import ngctl.acciones.caller as call
 import ngctl.config.constantes as cons
+import ngctl.acciones.generador as genr
 import logging,argparse,logging.config
 from subprocess import getoutput as geto
 
@@ -315,6 +316,14 @@ def exec_export(args):
         export.print_usage()
     status(exec_export.__name__)
 
+def exec_generate(args):
+    status(exec_generate.__name__)
+    if args.contactgroups != None:
+        genr.generar_alarmas_basicas(lista_hosts, lista_alarmas, lista_contacts, \
+            lista_contactgroups, args.host_name, args.ip, args.contacts, *args.contactgroups)
+    else: generate.print_usage()
+    status(exec_generate.__name__)
+
 def create_command():
     global parser
     parser = argparse.ArgumentParser(description='nagiosctl es usado para procesar objetos de configuracion nagios de manera modular.')
@@ -524,8 +533,18 @@ def create_command():
     group_edit_tpe.add_argument('-x','--delete-elemento',metavar='ELEMENTO',dest='del_elemento',help='elimina a ELEMENTO en atributo')
     edit_tpe.set_defaults(func=exec_timeperiod_atrib)
 
+#A generate subcommand
+    global generate
+    generate = subparsers.add_parser('generate', help='Generar alarmas basicas PING, CPU, RAM, HD')
+    generate.add_argument(cons.ID_HST, help='Nombre de host')
+    generate.add_argument('-c', '--contacts', required=True, help='atributo contacts')
+    generate.add_argument('-G', '--contactgroups', nargs='+', help='atributo contactgroups')
+    generate.add_argument('-i', '--ip', required=True, help='Direccion IP del nuevo host')
+    #generate.add_argument('-f', '--force-name', dest='force', action='store_true', default=False, help='forzar a mostrar nombre de objeto que coincide con la busqueda')
+    generate.set_defaults(func=exec_generate)
+
     args = parser.parse_args()
-    #print(args)
+    print(args)
     args.func(args)
 
 if __name__ == '__main__':

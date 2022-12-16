@@ -12,6 +12,10 @@ LOG = '/var/log/nagios/nagiosctl.log'
 #archivo de configuracion del logger de python
 LOG_CONF = '/data/source/ngctl/config/logging.conf' 
 
+#archivo de credenciales SNMP
+FILE_SNMPV3 = '/usr/local/nagios/homemade/snmp_v3_server.txt'
+FILE_SNMPV2 = '/usr/local/nagios/homemade/snmp_v2_server.txt'
+
 #directorios de trabajo de la app 
 DIR = '/data/objects/'  #path completo a los archivos (.cfg) de configuracion de nagios
 DIR_BK = '/data/backup/'  #path completo donde se guardaran los archivos de respaldo luego de un cambio (solo se guarda el ultimo cambio)
@@ -54,5 +58,42 @@ ID_CNT = 'contact_name'
 ID_CGR = 'contactgroup_name'
 ID_TPE = 'timeperiod_name'
 
+MODELO = {
+    "CPU": \
+    """define service{
+	use                 	DEFAULT         
+	service_description 	HOST_CPU
+	retry_check_interval	5
+	notification_options	c,r,w
+	host_name           	HOST
+	check_command       	ch_snmp_cpu_linux
+}""",
+    "RAM": \
+        """define service{
+	use                 	DEFAULT         
+	service_description 	HOST_RAM
+	retry_check_interval	5
+	notification_options	c,r,w
+	host_name           	HOST
+	check_command       	ch_snmp_ram_linux
+}""",
+    "HD": \
+        """define service{
+	use                 	DEFAULT         
+	service_description 	HOST_HD_ARG1
+	retry_check_interval	5
+	notification_options	c,r,w
+	host_name           	HOST
+	check_command       	ch_snmp_hd_linux
+}""",
+    "HOST": \
+        """define host{
+    use                 DEFAULT
+    host_name           ARG1
+    address             IPADD
+    contacts            CNTCT            
+    notification_period 24x7
+}"""
+}
 if __name__ == '__main__':
     pass
