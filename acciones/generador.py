@@ -69,7 +69,7 @@ def _add_alarmas(lista_alarmas, host, servicio, comando):
     lista_alarmas.append(alarma)
     logger.info(f'Se agrego la alarma {host}_{servicio} en {cons.ORIG_SRV}', extra=cons.EXTRA)
 
-    def _add_host(lista_hosts, lista_contactgroups, host, ip, contact, contactgroup):
+def _add_host(lista_hosts, lista_contactgroups, host, ip, contact, contactgroup):
     hostname = Host()
     hostname.add_tipo('host{')
     hostname.add_parametro(['use','DEFAULT'])

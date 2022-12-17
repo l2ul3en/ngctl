@@ -535,12 +535,11 @@ def create_command():
 
 #A generate subcommand
     global generate
-    generate = subparsers.add_parser('generate', help='Generar alarmas basicas PING, CPU, RAM, HD')
+    generate = subparsers.add_parser('generate', help='Generar alarmas basicas PING, CPU, RAM, HD - SO Linux')
     generate.add_argument(cons.ID_HST, help='Nombre de host')
     generate.add_argument('-c', '--contacts', required=True, help='atributo contacts')
     generate.add_argument('-G', '--contactgroups', nargs='+', help='atributo contactgroups')
     generate.add_argument('-i', '--ip', required=True, help='Direccion IP del nuevo host')
-    #generate.add_argument('-f', '--force-name', dest='force', action='store_true', default=False, help='forzar a mostrar nombre de objeto que coincide con la busqueda')
     generate.set_defaults(func=exec_generate)
 
     args = parser.parse_args()
