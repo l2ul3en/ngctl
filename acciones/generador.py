@@ -27,6 +27,7 @@ def _existe_config(ip,archivo):
     exitcode, out = ejec(cmd)
     if (exitcode != 0):
         return (False,out);
+    print(out)
     return (True,out)
 
 def get_array_value(ip, oid, patron):
@@ -45,6 +46,7 @@ def get_array_value(ip, oid, patron):
             cmd = f"snmpwalk -v {version} -c {comunidad} {ipaddress} {oid} -On";
             exitcode, line = ejec(cmd)
     else:
+        print(line)
         ipaddress,user,passAuth,passEncr,authPro,privPro,secuLev = line.split('|');
         cmd = f"snmpwalk -v3 -u {user} -A {passAuth} -X {passEncr} \
             -a {authPro} -x {privPro} -l {secuLev} {ipaddress} {oid} -On";
