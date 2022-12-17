@@ -544,7 +544,7 @@ def create_command():
     generate.set_defaults(func=exec_generate)
 
     args = parser.parse_args()
-    print(args)
+    #print(args)
     args.func(args)
 
 if __name__ == '__main__':
