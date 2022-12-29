@@ -10,16 +10,22 @@ EXTRA = {'user' : geto('whoami')}
 LOG = '/var/log/nagios/nagiosctl.log'
 
 #archivo de configuracion del logger de python
-LOG_CONF = '/template/source/ngctl/config/logging.conf'
+LOG_CONF = '/data/source/ngctl/config/logging.conf'
 
 #archivo de credenciales SNMP
 FILE_SNMPV3 = '/usr/local/nagios/homemade/snmp_v3_server.txt'
 FILE_SNMPV2 = '/usr/local/nagios/homemade/snmp_v2_server.txt'
 
+#comands alarmas basicas
+CMND_PING = 'check-host-alive'
+CMND_CPU_LINUX = 'ch_snmp_cpu_linux'
+CMND_RAM_LINUX = 'ch_snmp_ram_linux'
+CMND_HD_LINUX = 'ch_snmp_hd_linux'
+
 #directorios de trabajo de la app
-DIR = '/template/objects/'  #path completo a los archivos (.cfg) de configuracion de nagios
-DIR_BK = '/template/backup/'  #path completo donde se guardaran los archivos de respaldo luego de un cambio (solo se guarda el ultimo cambio)
-DIR_TMP = '/template/cache/'  #path completo donde se guardaran los archivos temporales
+DIR = '/data/objects/'  #path completo a los archivos (.cfg) de configuracion de nagios
+DIR_BK = '/data/backup/'  #path completo donde se guardaran los archivos de respaldo luego de un cambio (solo se guarda el ultimo cambio)
+DIR_TMP = '/data/cache/'  #path completo donde se guardaran los archivos temporales
 
 #si se procesaran nuevos archivos de configuracion se deben agregar 4 nuevas constantes para su funcionamiento
 #1. Archivos de objetos de configuracion nagios

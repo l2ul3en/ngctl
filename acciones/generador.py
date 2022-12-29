@@ -100,11 +100,11 @@ lista_contactgroups, hostname, ip, contact, *contactgroup):
         array = get_array_value(ip,'HOST-RESOURCES-MIB::hrFSMountPoint','.*= STRING: "(?!/(dev|sys|proc|run)(/.*)?"$)(.*)"$' )
         discos = [x[2] for x in array]
         _add_host(lista_hosts, lista_contactgroups,  hostname, ip, contact, contactgroup)
-        _add_alarmas(lista_alarmas, hostname, 'PING', 'check-host-alive')
-        _add_alarmas(lista_alarmas, hostname, 'CPU', 'ch_snmp_cpu_linux')
-        _add_alarmas(lista_alarmas, hostname, 'RAM', 'ch_snmp_ram_linux')
+        _add_alarmas(lista_alarmas, hostname, 'PING', cons.CMND_PING)
+        _add_alarmas(lista_alarmas, hostname, 'CPU', cons.CMND_CPU_LINUX)
+        _add_alarmas(lista_alarmas, hostname, 'RAM', cons.CMND_RAM_LINUX)
         for hd in discos:
-            _add_alarmas(lista_alarmas, hostname, f'HD_{hd}', f'ch_snmp_hd_linux!{hd}')
+            _add_alarmas(lista_alarmas, hostname, f'HD_{hd}', f'{cons.CMND_HD_LINUX}!{hd}')
         tser.aplicar_cambios(lista_alarmas)
     logger.info('finalizando generar_alarmas_basicas', extra=cons.EXTRA)
 
