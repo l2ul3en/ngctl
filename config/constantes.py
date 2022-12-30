@@ -13,14 +13,17 @@ LOG = '/var/log/nagios/nagiosctl.log'
 LOG_CONF = '/data/source/ngctl/config/logging.conf'
 
 #archivo de credenciales SNMP
-FILE_SNMPV3 = '/usr/local/nagios/homemade/snmp_v3_server.txt'
-FILE_SNMPV2 = '/usr/local/nagios/homemade/snmp_v2_server.txt'
+FILE_SNMPV3 = '/home/manfred/projects/snmp_v3_server.txt'
+FILE_SNMPV2 = '/home/manfred/projects/snmp_v2_server.txt'
 
 #comands alarmas basicas
 CMND_PING = 'check-host-alive'
 CMND_CPU_LINUX = 'ch_snmp_cpu_linux'
 CMND_RAM_LINUX = 'ch_snmp_ram_linux'
 CMND_HD_LINUX = 'ch_snmp_hd_linux'
+CMND_CPU_WINDOWS = 'ch_snmp_cpu_windows'
+CMND_RAM_WINDOWS = 'ch_snmp_ram_windows'
+CMND_HD_WINDOWS = 'ch_snmp_hd_windows'
 
 #directorios de trabajo de la app
 DIR = '/data/objects/'  #path completo a los archivos (.cfg) de configuracion de nagios
