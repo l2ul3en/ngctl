@@ -95,18 +95,17 @@ def _ejecutar_comando(ip: str, comando: str, oid='', param_opc=''):
             -a {authPro} -x {privPro} -l {secuLev} {ipaddress} {oid} {param_opc}";
         exitcode, line = ejec(cmd)
     
-    if (exitcode != None and exitcode != 0):
+    if (exitcode != 0):
         return (False,line)
     logger.info(f'comando: {cmd}', extra=cons.EXTRA)
     return (True,line)
 
-def get_status_snmp(ip: str):
+def check_status_snmp(ip: str):
     """Verifica si existe respuesta SNMP
     Devuelve un string con la salida del comando."""
     estado, salida = _ejecutar_comando(ip, 'snmpstatus')
     if (not estado):
-        logger.info(f'no se tiene respuesta SNMP: {salida}', extra=cons.EXTRA)
-        sys.exit(3) #finalizar ejecucion del programa
+        return (False, salida)
     return (True, salida)
 
 def verificar_ping(ip: str):
@@ -116,14 +115,6 @@ def verificar_ping(ip: str):
     if (exitcode != 0):
         return (False,out)
     return (True,out)
-
-def _get_array_index(ip: str, oid: str, patron: str):
-    estado, salida = _ejecutar_comando(ip,'snmpwalk', oid)
-    if (estado):
-        return re.findall(rf'{patron}', salida, re.MULTILINE)
-    else:
-        logger.info(f'no se pudo ejecutar el comando: {salida}', extra=cons.EXTRA)
-        sys.exit(3)
 
 ### Generate
 
@@ -137,7 +128,7 @@ lista_contactgroups, hostname, ip, contact, *contactgroup):
     else:
         estado, salida = verificar_ping(ip)
         if(estado):
-            estado, salida = get_status_snmp(ip)
+            estado, salida = check_status_snmp(ip)
             if estado:
                 if ('Linux' in salida):
                     array = get_array_value(ip,'HOST-RESOURCES-MIB::hrFSMountPoint', '.*= STRING: "(?!/(dev|sys|proc|run)(/.*)?"$)(.*)"$' )

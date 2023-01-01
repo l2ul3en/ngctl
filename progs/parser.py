@@ -535,7 +535,7 @@ def create_command():
 
 #A generate subcommand
     global generate
-    generate = subparsers.add_parser('generate', help='Generar alarmas basicas PING, CPU, RAM, HD - SO Linux')
+    generate = subparsers.add_parser('generate', help='Generar alarmas basicas PING, CPU, RAM, HD - SO Linux Windows')
     generate.add_argument(cons.ID_HST, help='Nombre de host')
     generate.add_argument('-c', '--contacts', required=True, help='atributo contacts')
     generate.add_argument('-G', '--contactgroups', nargs='+', help='atributo contactgroups')
