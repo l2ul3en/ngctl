@@ -7,23 +7,20 @@ sys.path.append('../../')
 import ngctl.config.constantes as cons
 import ngctl.extras.toolss as tser
 import ngctl.extras.toolsh as thos
-#import ngctl.extras.toolsg as thgr
-#import ngctl.extras.toolsCommand as tcmd
 import ngctl.extras.toolsContact as tcnt
 import ngctl.extras.toolsContactGroup as tcgr
 import ngctl.acciones.caller as call
-#import ngctl.extras.toolsTimeperiod as ttpe
 from ngctl.clases.Alarma import Alarma
 from ngctl.clases.Host import Host
 import logging, logging.config, re
 from subprocess import getstatusoutput as ejec
-from subprocess import getoutput as geto
 
 logging.config.fileConfig(cons.LOG_CONF)
 logger = logging.getLogger(__name__)
 
-def _existe_config(ip,archivo):
-    """Devuelve una tupla (booleano,string) indica estado y salida del comando."""
+def _existe_config(ip: str,archivo: str):
+    """Verifica si existe registro SNMP para IP en el archivo
+    Devuelve una tupla (boolean,string) indica estado y salida del comando."""
     cmd = f"grep -w '{ip}' {archivo}";
     exitcode, out = ejec(cmd)
     if (exitcode != 0):
@@ -31,8 +28,7 @@ def _existe_config(ip,archivo):
     return (True,out)
 
 def get_array_value(ip, oid, patron, opc=''):
-    """Devuelve un array en el cual los elementos coinciden con el patron;
-    Si inverso es true devuelve los elementos del arrary que no coinciden con patron."""
+    """Devuelve un array en el cual los elementos coinciden con el patron."""
     estado, salida = _ejecutar_comando(ip,'snmpwalk', oid, opc)
     if (estado):
         regexp = re.compile(rf'{patron}', re.MULTILINE)
@@ -42,6 +38,7 @@ def get_array_value(ip, oid, patron, opc=''):
         sys.exit(3)
 
 def _add_alarmas(lista_alarmas, host, servicio, comando):
+    """Agrega una alarma solo en memoria RAM."""
     alarma = Alarma()
     alarma.add_tipo('service{')
     alarma.add_parametro(['use','DEFAULT'])
@@ -57,6 +54,7 @@ def _add_alarmas(lista_alarmas, host, servicio, comando):
     logger.info(f'Se agrego la alarma {host}_{servicio} en {cons.ORIG_SRV}', extra=cons.EXTRA)
 
 def _add_host(lista_hosts, lista_contactgroups, host, ip, contact, contactgroup):
+    """Agrega un host y aplica cambio persistente."""
     hostname = Host()
     hostname.add_tipo('host{')
     hostname.add_parametro(['use','DEFAULT'])
@@ -78,13 +76,13 @@ def _add_host(lista_hosts, lista_contactgroups, host, ip, contact, contactgroup)
     thos.aplicar_cambios(lista_hosts)
 
 def _ejecutar_comando(ip: str, comando: str, oid='', param_opc=''):
-    """Devuelve el estado de ejecucion y la salida estandar para SNMP."""
+    """Devuelve el estado de ejecucion y la salida estandar para ejecutar un comando SNMP."""
     exitcode = None
     encontrado, line = _existe_config(ip,cons.FILE_SNMPV3)
     if (not encontrado):
         encontrado, line = _existe_config(ip,cons.FILE_SNMPV2)
         if (not encontrado):
-            logger.info(f'no se encontro config snmp para {ip}', extra=cons.EXTRA)
+            logger.warning(f'no se encontro config snmp para {ip}', extra=cons.EXTRA)
         else:
             ipaddress,version,comunidad = line.split('|');
             cmd = f"{comando} -v {version} -c {comunidad} {ipaddress} {oid} {param_opc}";
@@ -96,13 +94,13 @@ def _ejecutar_comando(ip: str, comando: str, oid='', param_opc=''):
         exitcode, line = ejec(cmd)
     
     if (exitcode != 0):
-        return (False,line)
+        return (False, line)
     logger.info(f'comando: {cmd}', extra=cons.EXTRA)
     return (True,line)
 
 def check_status_snmp(ip: str):
     """Verifica si existe respuesta SNMP
-    Devuelve un string con la salida del comando."""
+    Devuelve una tupla con el estado y salida del comando."""
     estado, salida = _ejecutar_comando(ip, 'snmpstatus')
     if (not estado):
         return (False, salida)
@@ -113,7 +111,8 @@ def verificar_ping(ip: str):
     Devuelve una tupla con el estado y la salida del comando."""
     exitcode, out = ejec(f'ping -c4 {ip}')
     if (exitcode != 0):
-        return (False,out)
+        aux = re.search(r'^(4 packets.*)$', out, re.MULTILINE)[1]
+        return (False,aux)
     return (True,out)
 
 ### Generate
@@ -152,9 +151,9 @@ lista_contactgroups, hostname, ip, contact, *contactgroup):
                         array = get_array_value(ip, oid, rf'{oid}\.{index} = STRING: ([A-Z]):.*')
                         _add_alarmas(lista_alarmas, hostname, f'HD_{array[0]}', cons.CMND_HD_WINDOWS)
                     tser.aplicar_cambios(lista_alarmas)
-                else: logger.info('Sistema operativo no soportado', extra=cons.EXTRA)
-            else: logger.info(f'no se tiene respuesta SNMP: {salida}')
-        else: logger.info(f'no se tiene respuesta ICMP: {salida}', extra=cons.EXTRA)
+                else: logger.warning('Sistema operativo no soportado', extra=cons.EXTRA)
+            else: logger.info('no se tiene respuesta SNMP', extra=cons.EXTRA)
+        else: logger.warning(f'no se tiene respuesta ICMP a {ip}: {salida}', extra=cons.EXTRA)
     logger.info('finalizando generar_alarmas_basicas', extra=cons.EXTRA)
 
 if __name__ == '__main__':

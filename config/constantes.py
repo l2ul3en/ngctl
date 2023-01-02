@@ -13,8 +13,8 @@ LOG = '/var/log/nagios/nagiosctl.log'
 LOG_CONF = '/data/source/ngctl/config/logging.conf'
 
 #archivo de credenciales SNMP
-FILE_SNMPV3 = '/home/manfred/projects/snmp_v3_server.txt'
-FILE_SNMPV2 = '/home/manfred/projects/snmp_v2_server.txt'
+FILE_SNMPV3 = '/usr/local/nagios/homemade/snmp_v3_server.txt'
+FILE_SNMPV2 = '/usr/local/nagios/homemade/snmp_v2_server.txt'
 
 #comands alarmas basicas
 CMND_PING = 'check-host-alive'
