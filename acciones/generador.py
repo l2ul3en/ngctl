@@ -152,7 +152,7 @@ lista_contactgroups, hostname, ip, contact, *contactgroup):
                         _add_alarmas(lista_alarmas, hostname, f'HD_{array[0]}', cons.CMND_HD_WINDOWS)
                     tser.aplicar_cambios(lista_alarmas)
                 else: logger.warning('Sistema operativo no soportado', extra=cons.EXTRA)
-            else: logger.info('no se tiene respuesta SNMP', extra=cons.EXTRA)
+            else: logger.warning(f'no se tiene respuesta SNMP a {ip}', extra=cons.EXTRA)
         else: logger.warning(f'no se tiene respuesta ICMP a {ip}: {salida}', extra=cons.EXTRA)
     logger.info('finalizando generar_alarmas_basicas', extra=cons.EXTRA)
 
