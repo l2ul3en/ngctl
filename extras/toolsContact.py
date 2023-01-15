@@ -27,15 +27,18 @@ def cargar():
     """Devuelve una lista de objetos Contacts.
 
 Lee linea a linea el archivo especificado en constantes.py cargando todo las definiciones de contacts.
-  Lista     ->  [['contact_name',['atributo valor1',...,'atributo valorN']]]"""
+Lista     ->  [['contact_name',['atributo valor1',...,'atributo valorN']]]"""
     lista_contact = []
     contact = Contact()
     with open (cons.DIR + cons.ORIG_CNT,'r') as f:
         for i in f:
-            char = i.find(';')
-            if char != -1: i = i[:char]
+            #Se eliminan los comentarios que empiezan por '#' o ';'
+            if ('#' in i):
+                i = i[:i.find('#')]
+            if (';' in i):
+                i = i[:i.find(';')]
             i = i.strip()
-            if i == '' or i.startswith(('define','#')):
+            if i == '':
                 continue
             elif i.startswith('}'):
                 contact.ordenar()

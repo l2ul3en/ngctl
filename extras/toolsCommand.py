@@ -27,15 +27,18 @@ def cargar():
     """Devuelve una lista de objetos Commands.
 
 Lee linea a linea el archivo especificado en constantes.py cargando todo las definiciones de commands.
-  Lista     ->  [['command_name',['atributo valor1',...,'atributo valorN']]]"""
+Lista     ->  [['command_name',['atributo valor1',...,'atributo valorN']]]"""
     lista_command = []
     command = Command()
     with open (cons.DIR + cons.ORIG_CMD,'r') as f:
         for i in f:
-            char = i.find(';')
-            if char != -1: i = i[:char]
+            #Se eliminan los comentarios que empiezan por '#' o ';'
+            if ('#' in i):
+                i = i[:i.find('#')]
+            if (';' in i):
+                i = i[:i.find(';')]
             i = i.strip()
-            if i == '' or i.startswith(('define','#')):
+            if i == '':
                 continue
             elif i.startswith('}'):
                 command.ordenar(rev=True)

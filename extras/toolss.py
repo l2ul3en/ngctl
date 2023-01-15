@@ -30,10 +30,13 @@ def cargar():
     regex = re.compile(r'\s+')
     with open (cons.DIR + cons.ORIG_SRV ,'r') as f:
         for i in f:
-            char = i.find(';')
-            if char != -1: i = i[:char]
+            #Se eliminan los comentarios que empiezan por '#' o ';'
+            if ('#' in i):
+                i = i[:i.find('#')]
+            if (';' in i):
+                i = i[:i.find(';')]
             i = i.strip()
-            if i == '' or i.startswith('#'):
+            if i == '':
                 continue
             elif i.startswith('}'):
                 alarma.add_tipo(regex.sub('',alarma.get_valor('define')))

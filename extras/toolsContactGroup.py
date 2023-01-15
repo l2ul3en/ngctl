@@ -27,15 +27,18 @@ def cargar():
     """Devuelve una lista de objetos ContactGroups.
 
 Lee linea a linea el archivo especificado en constantes.py cargando todo las definiciones de contactgroups.
-  Lista     ->  [['contactgroup_name',['atributo valor1',...,'atributo valorN']]]"""
+Lista     ->  [['contactgroup_name',['atributo valor1',...,'atributo valorN']]]"""
     lista_contactgroup = []
     contactgroup = ContactGroup()
     with open (cons.DIR + cons.ORIG_CGR,'r') as f:
         for i in f:
-            char = i.find(';')
-            if char != -1: i = i[:char]
+            #Se eliminan los comentarios que empiezan por '#' o ';'
+            if ('#' in i):
+                i = i[:i.find('#')]
+            if (';' in i):
+                i = i[:i.find(';')]
             i = i.strip()
-            if i == '' or i.startswith(('define','#')):
+            if i == '':
                 continue
             elif i.startswith('}'):
                 contactgroup.ordenar()

@@ -32,10 +32,13 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
     hostgroup = Hostgroup()
     with open (cons.DIR + cons.ORIG_HGR,'r') as f:
         for i in f:
-            char = i.find(';')
-            if char != -1: i = i[:char]
+            #Se eliminan los comentarios que empiezan por '#' o ';'
+            if ('#' in i):
+                i = i[:i.find('#')]
+            if (';' in i):
+                i = i[:i.find(';')]
             i = i.strip()
-            if i == '' or i.startswith(('define','#')):
+            if i == '':
                 continue
             elif i.startswith('}'):
                 hostgroup.ordenar(rev=False)

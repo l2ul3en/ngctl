@@ -539,7 +539,7 @@ def create_command():
     generate.add_argument(cons.ID_HST, help='Nombre de host')
     generate.add_argument('-c', '--contacts', required=True, help='atributo contacts')
     generate.add_argument('-G', '--contactgroups', nargs='+', help='atributo contactgroups')
-    generate.add_argument('-i', '--ip', required=True, help='Direccion IP del nuevo host')
+    generate.add_argument('-i', '--ip', type=validar_formato_ip, required=True, help='Direccion IP del nuevo host')
     generate.set_defaults(func=exec_generate)
 
     args = parser.parse_args()

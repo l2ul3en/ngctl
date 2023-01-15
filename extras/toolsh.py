@@ -27,16 +27,19 @@ def cargar():
     """Devuelve una lista de objetos Host.
 
 Lee linea a linea el archivo especificado en constantes.py cargando todo las definiciones de hosts.
-  Lista     ->  [['host_name',['atributo valor1',...,'atributo valorN']]]"""
+Lista     ->  [['host_name',['atributo valor1',...,'atributo valorN']]]"""
     lista_hosts = []
     host = Host()
     regex = re.compile(r'\s+')
     with open (cons.DIR + cons.ORIG_HST,'r') as f:
         for i in f:
-            char = i.find(';')
-            if char != -1: i = i[:char]
+            #Se eliminan los comentarios que empiezan por '#' o ';'
+            if ('#' in i):
+                i = i[:i.find('#')]
+            if (';' in i):
+                i = i[:i.find(';')]
             i = i.strip()
-            if i == '' or i.startswith('#'):
+            if i == '':
                 continue
             elif i.startswith('}'):
                 host.add_tipo(regex.sub('',host.get_valor('define')))
