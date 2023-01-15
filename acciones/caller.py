@@ -33,24 +33,27 @@ def modificar_atributo(lista, key, atributo, new, host=None):
     if not tser.existe_alarma(lista, key, host):
         if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        alarma = tser.get_alarma(lista,key, host)
+        alarma = tser.get_alarma(lista,key, host)[1]
         if alarma.existe_atributo(atributo):
             alarma.add_valor(atributo, new)
             tser.aplicar_cambios(lista)
         else: 
             if host != None: logger.warning(f'no existe el atributo {atributo} en el host {host}', extra=cons.EXTRA)
             else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando modificar_atributo', extra=cons.EXTRA)
 
 def mostrar_alarma(lista, alarma, host=None):
     logger.info('iniciando mostrar_alarma', extra=cons.EXTRA)
     if tser.existe_alarma(lista, alarma, host):
-            tser.show_alarma(lista,alarma, host)
-            logger.info(f'se visualizo {alarma}', extra=cons.EXTRA)
+        tser.show_alarma(lista,alarma, host)
+        logger.info(f'se visualizo {alarma}', extra=cons.EXTRA)
     else:
-            if host != None: logger.warning(f'no se encontro la alarma {alarma} definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
-            else: logger.warning(f'no se encontro la alarma {alarma} definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        if host != None: logger.warning(f'no se encontro la alarma {alarma} definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        else: logger.warning(f'no se encontro la alarma {alarma} definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_alarma', extra=cons.EXTRA)
 
 def eliminar_alarma(lista, key, host=None):
@@ -61,6 +64,7 @@ def eliminar_alarma(lista, key, host=None):
     else:
         if host != None: logger.warning(f'no se encontro la alarma {key} definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         else: logger.warning(f'no se encontro la alarma {key} definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_alarma', extra=cons.EXTRA)
 
 def copiar_servicio(lista, key, new, host=None):
@@ -71,6 +75,7 @@ def copiar_servicio(lista, key, new, host=None):
     else:
         if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando copiar_servicio', extra=cons.EXTRA)
 
 def eliminar_atributo(lista,key, atributo, host=None):
@@ -78,14 +83,16 @@ def eliminar_atributo(lista,key, atributo, host=None):
     if not tser.existe_alarma(lista, key, host):
         if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        alarma = tser.get_alarma(lista, key, host)
+        alarma = tser.get_alarma(lista, key, host)[1]
         if alarma.existe_atributo(atributo):
             alarma.del_parametro(atributo)
             tser.aplicar_cambios(lista)
         else:
             if host != None: logger.warning(f'no existe el atributo {atributo} en el host {host}', extra=cons.EXTRA)
             else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_atributo', extra=cons.EXTRA)
 
 def eliminar_elemento(lista, key, atributo, dato, host=None): #solo se puede eliminar un elem a la vez
@@ -93,16 +100,20 @@ def eliminar_elemento(lista, key, atributo, dato, host=None): #solo se puede eli
     if not tser.existe_alarma(lista, key, host):
         if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        alarma = tser.get_alarma(lista, key, host)
+        alarma = tser.get_alarma(lista, key, host)[1]
         if alarma.existe_atributo(atributo):
             if alarma.existe_elemento(atributo, dato):
                 alarma.del_elemento(atributo, dato)
                 tser.aplicar_cambios(lista)
-            else: logger.warning(f'no existe el elemento {dato}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'no existe el elemento {dato}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 1
         else:
             if host != None: logger.warning(f'no existe el atributo {atributo} en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
             else: logger.warning(f'no existe el atributo {atributo} en la alarma {key}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_elemento', extra=cons.EXTRA)
 
 def agregar_elemento(lista, key, atributo, dato, host=None): #puede add varios elems separados x , Ej w,c,r
@@ -110,8 +121,9 @@ def agregar_elemento(lista, key, atributo, dato, host=None): #puede add varios e
     if not tser.existe_alarma(lista, key):
         if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        alarma = tser.get_alarma(lista,key, host)
+        alarma = tser.get_alarma(lista,key, host)[1]
         if alarma.existe_atributo(atributo):
             if not alarma.existe_elemento(atributo, dato):
                 alarma.add_elemento(atributo, dato)
@@ -119,6 +131,7 @@ def agregar_elemento(lista, key, atributo, dato, host=None): #puede add varios e
             else: 
                 if host != None: logger.warning(f'ya existe el elemento {dato} en la alarma {key} del host {host}', extra=cons.EXTRA)
                 else: logger.warning(f'ya existe el elemento {dato} en {key}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 2
         else:
             alarma.add_parametro([atributo, dato])
             if host != None: logger.info(f'se agrego {atributo} {dato} en la alarma {alarma} del host {host}', extra=cons.EXTRA)
@@ -131,14 +144,17 @@ def agregar_parametro(lista, key, atributo, valor, host=None):
     if not tser.existe_alarma(lista, key, host):
         if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        alarma = tser.get_alarma(lista, key, host)
+        alarma = tser.get_alarma(lista, key, host)[1]
         if not alarma.existe_atributo(atributo):
             alarma.add_parametro([atributo,valor])
             if host != None: logger.info(f'se agrego {atributo} {valor} en el host {host}', extra=cons.EXTRA)
             else: logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
             tser.aplicar_cambios(lista)
-        else: logger.warning(f'ya existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'ya existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
     logger.info('finalizando agregar_parametro', extra=cons.EXTRA)
 
 def mostrar_atributo(lista, key, atributo, host=None):
@@ -146,13 +162,15 @@ def mostrar_atributo(lista, key, atributo, host=None):
     if not tser.existe_alarma(lista, key):
         if host != None: logger.warning(f'la alarma {key} no esta definida en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         else: logger.warning(f'la alarma {key} no esta definida en {cons.ORIG_SRV}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        alarma = tser.get_alarma(lista, key, host)
+        alarma = tser.get_alarma(lista, key, host)[1]
         if alarma.existe_atributo(atributo):
             print(alarma.get_valor(atributo))
         else: 
             if host != None: logger.warning(f'no existe el atributo {atributo} en el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
             logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_atributo_host', extra=cons.EXTRA)
 
 #Metodos de HOST
@@ -172,7 +190,8 @@ def mostrar_listado_servicios(lalarmas, lhosts, host):
             if e.errno == errno.EPIPE: pass
         logger.info(f'se visualizo {c} alarmas asociadas al host {host}', extra=cons.EXTRA) 
     else:
-        logger.warning(f'{host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_listado_servicios', extra=cons.EXTRA)
 
 def reporte_host(lalarmas, lhosts, host, verbose):
@@ -187,15 +206,19 @@ def reporte_host(lalarmas, lhosts, host, verbose):
                     sys.stderr.close()
         logger.info(f'se tiene {frec} alarmas configuradas para el host {host} en {cons.ORIG_SRV}', extra=cons.EXTRA)
         print(f'se tiene {frec} alarmas configuradas para el host {host} en {cons.ORIG_SRV}')
-    else: logger.warning(f'no existe definicion de {host} en {cons.ORIG_HST}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando reporte_host', extra=cons.EXTRA)
 
 def renombrar_host(lalarmas, lhostgroups, lhosts, host, new, verbose):
     logger.info('iniciando renombrar_host', extra=cons.EXTRA)
     if not thos.existe_host(lhosts, host):
-        logger.warning(f'no existe definicion de {host} en {cons.ORIG_HST}', extra=cons.EXTRA)
+        logger.warning(f'el host {host} no existe en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     elif thos.existe_host(lhosts, new):
         logger.warning(f'el host {new} ya existe en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 2
     else:
         frec = 0
         for i in thgr.get_list_host_in_group(lhostgroups,host):
@@ -219,7 +242,7 @@ def copiar_host(lalarmas, lhosts, host, new, ip):
     logger.info('iniciando copiar_host', extra=cons.EXTRA)
     if thos.existe_host(lhosts, host):
         if not thos.existe_host(lhosts, new):
-            hostname = thos.get_host(lhosts,host)
+            hostname = thos.get_host(lhosts,host)[1]
             ip_old = hostname.get_valor('address')
             if ip == ip_old:
                 logger.info(f'la IP {ip} anterior y nueva son iguales', extra=cons.EXTRA)
@@ -227,8 +250,12 @@ def copiar_host(lalarmas, lhosts, host, new, ip):
             thos.copy_host(lhosts, host, new,ip)
             tser.aplicar_cambios(lalarmas)
             thos.aplicar_cambios(lhosts)
-        else: logger.warning(f'el host {new} ya existe en {cons.ORIG_HST}, proceder a adicionar manualmente', extra=cons.EXTRA)
-    else: logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'el host {new} ya existe en {cons.ORIG_HST}, proceder a adicionar manualmente', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
+    else:
+        logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando copiar_host', extra=cons.EXTRA)
 
 def eliminar_host(lalarmas, lhosts, lgrupos, host):
@@ -246,7 +273,9 @@ def eliminar_host(lalarmas, lhosts, lgrupos, host):
             logger.info(f'se elimino el host {host} del grupo {i.get_name()}', extra=cons.EXTRA)
             b = True
         if b: thgr.aplicar_cambios(lgrupos)
-    else: logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_host', extra=cons.EXTRA)
 
 def mostrar_host(lista, host):
@@ -254,7 +283,9 @@ def mostrar_host(lista, host):
     if thos.existe_host(lista, host):
         thos.show_host(lista,host)
         logger.info(f'se visualizo {host}', extra=cons.EXTRA)
-    else: logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_host', extra=cons.EXTRA)
 
 def mostrar_listado_hostgroup(lhost, lhostgroups, host):
@@ -265,71 +296,90 @@ def mostrar_listado_hostgroup(lhost, lhostgroups, host):
             print (i.get_name())
             c += 1
         logger.info(f'se visualizo {c} grupos asociados al host {host}', extra=cons.EXTRA)
-    else: logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_listado_hostgroup', extra=cons.EXTRA)
 
 def eliminar_atributo_host(lhosts,host, atributo):
     logger.info('iniciando eliminar_atributo_host', extra=cons.EXTRA)
     if not thos.existe_host(lhosts, host):
         logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        hostname = thos.get_host(lhosts, host)
+        hostname = thos.get_host(lhosts, host)[1]
         if hostname.existe_atributo(atributo):
             hostname.del_parametro(atributo)
             thos.aplicar_cambios(lhosts)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_atributo_host', extra=cons.EXTRA)
 
 def modificar_atributo_host(lhosts, key, atributo, new):
     logger.info('iniciando modificar_atributo_host', extra=cons.EXTRA)
     if not thos.existe_host(lhosts, key):
         logger.warning(f'el host {key} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        hostname = thos.get_host(lhosts,key)
+        hostname = thos.get_host(lhosts,key)[1]
         if hostname.existe_atributo(atributo):
             hostname.add_valor(atributo, new)
             thos.aplicar_cambios(lhosts)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando modificar_atributo_host', extra=cons.EXTRA)
 
 def agregar_parametro_host(lhosts, key, atributo, valor):
     logger.info('iniciando agregar_parametro_host', extra=cons.EXTRA)
     if not thos.existe_host(lhosts, key):
         logger.warning(f'el host {key} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        hostname = thos.get_host(lhosts,key)
+        hostname = thos.get_host(lhosts,key)[1]
         if not hostname.existe_atributo(atributo):
             hostname.add_parametro([atributo,valor])
             logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
             thos.aplicar_cambios(lhosts)
-        else: logger.warning(f'ya existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'ya existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
     logger.info('finalizando agregar_parametro_host', extra=cons.EXTRA)
 
 def eliminar_elemento_host(lhosts, key, atributo, dato): #solo se puede eliminar un elem a la vez
     logger.info('iniciando eliminar_elemento_host', extra=cons.EXTRA)
     if not thos.existe_host(lhosts, key):
         logger.warning(f'el host {key} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        hostname = thos.get_host(lhosts, key)
+        hostname = thos.get_host(lhosts, key)[1]
         if hostname.existe_atributo(atributo):
             if hostname.existe_elemento(atributo, dato):
                 hostname.del_elemento(atributo, dato)
                 thos.aplicar_cambios(lhosts)
-            else: logger.warning(f'no existe el elemento {dato} en {key}', extra=cons.EXTRA)
-        else: logger.warning(f'no existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'no existe el elemento {dato} en {key}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 1
+        else:
+            logger.warning(f'no existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_elemento_host', extra=cons.EXTRA)
 
 def agregar_elemento_host(lhosts, key, atributo, dato): #puede add varios elems separados x , Ej w,c,r
     logger.info('iniciando agregar_elemento_host', extra=cons.EXTRA)
     if not thos.existe_host(lhosts, key):
         logger.warning(f'el host {key} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        hostname = thos.get_host(lhosts,key)
+        hostname = thos.get_host(lhosts,key)[1]
         if hostname.existe_atributo(atributo):
             if not hostname.existe_elemento(atributo, dato):
                 hostname.add_elemento(atributo, dato)
                 thos.aplicar_cambios(lhosts)
-            else: logger.warning(f'ya existe el elemento {dato} en {key}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'ya existe el elemento {dato} en {key}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 2
         else:
             hostname.add_parametro([atributo, dato])
             logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
@@ -340,11 +390,14 @@ def mostrar_atributo_host(lhosts, host, atributo):
     logger.info('iniciando mostrar_atributo_host', extra=cons.EXTRA)
     if not thos.existe_host(lhosts, host):
         logger.warning(f'el host {host} no esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        hostname = thos.get_host(lhosts, host)
+        hostname = thos.get_host(lhosts, host)[1]
         if hostname.existe_atributo(atributo):
             print(hostname.get_valor(atributo))
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_atributo_host', extra=cons.EXTRA)
 
 #Metodos para Hostgroups
@@ -361,8 +414,12 @@ def duplicar_hostgroup(lhostgroups, grupo, new):
         if not thgr.existe_hostgroup(lhostgroups, new):
             thgr.copy_hostgroup(lhostgroups, grupo, new)
             thgr.aplicar_cambios(lhostgroups)
-        else: logger.warning(f'el hostgroup {new} ya existe en {cons.ORIG_HGR}', extra=cons.EXTRA)
-    else: logger.warning(f'el hostgroup {grupo} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'el hostgroup {new} ya existe en {cons.ORIG_HGR}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
+    else:
+        logger.warning(f'el hostgroup {grupo} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando duplicar_hostgroup', extra=cons.EXTRA)
 
 def mostrar_hostgroup(lista, grupo):
@@ -370,7 +427,9 @@ def mostrar_hostgroup(lista, grupo):
     if thgr.existe_hostgroup(lista, grupo):
         thgr.show_hostgroup(lista,grupo)
         logger.info(f'se visualizo {grupo}', extra=cons.EXTRA)
-    else: logger.warning(f'no se encontro el hostgroup {grupo} definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'no se encontro el hostgroup {grupo} definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_hostgroup', extra=cons.EXTRA)
 
 def eliminar_hostgroup(lhostgroups, grupo):
@@ -378,7 +437,9 @@ def eliminar_hostgroup(lhostgroups, grupo):
     if thgr.existe_hostgroup(lhostgroups, grupo):
         thgr.delete_hostgroup(lhostgroups, grupo)
         thgr.aplicar_cambios(lhostgroups)
-    else: logger.warning(f'el grupo {grupo} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el grupo {grupo} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_hostgroup', extra=cons.EXTRA)
 
 def renombrar_hostgroup(lhostgroups, grupo, new):
@@ -386,68 +447,86 @@ def renombrar_hostgroup(lhostgroups, grupo, new):
 
 def mostrar_listado_hosts(lhostgroups, grupo):
     logger.info('iniciando mostrar_listado_hosts', extra=cons.EXTRA)
-    hostgroup = thgr.get_hostgroup(lhostgroups,grupo)
-    if hostgroup.existe_atributo('members'):
-        try:
-            for i in thgr.get_listado_hosts(lhostgroups,grupo):
-                c = 0
-                for j in i.split(','):
-                    print(j)
-                    c += 1
-                logger.info(f'se visualizo {c} hosts asociados al grupo {grupo}', extra=cons.EXTRA)
-        except IOError as e:
-            if e.errno == errno.EPIPE: pass
-    else: logger.warning(f'no existe el atributo members en el grupo {hostgroup.get_name()}', extra=cons.EXTRA)
+    encontrado, hostgroup = thgr.get_hostgroup(lhostgroups,grupo)
+    if (encontrado):
+        if hostgroup.existe_atributo('members'):
+            try:
+                for i in thgr.get_listado_hosts(lhostgroups,grupo):
+                    c = 0
+                    for j in i.split(','):
+                        print(j)
+                        c += 1
+                    logger.info(f'se visualizo {c} hosts asociados al grupo {grupo}', extra=cons.EXTRA)
+            except IOError as e:
+                if e.errno == errno.EPIPE: pass
+        else:
+            logger.warning(f'no existe el atributo members en el grupo {hostgroup.get_name()}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
+    else: 
+        logger.warning(f'el grupo {grupo} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_listado_hosts', extra=cons.EXTRA)
 
 def eliminar_atributo_grupo(lhostgroups,hostgroup, atributo):
     logger.info('iniciando eliminar_atributo_grupo', extra=cons.EXTRA)
     if not thgr.existe_hostgroup(lhostgroups, hostgroup):
         logger.warning(f'el grupo {hostgroup} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        grupo = thgr.get_hostgroup(lhostgroups, hostgroup)
+        grupo = thgr.get_hostgroup(lhostgroups, hostgroup)[1]
         if grupo.existe_atributo(atributo):
             grupo.del_parametro(atributo)
             thgr.aplicar_cambios(lhostgroups)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_atributo_grupo', extra=cons.EXTRA)
 
 def agregar_parametro_grupo(lhostgroups, key, atributo, valor):
     logger.info('iniciando agregar_parametro_grupo', extra=cons.EXTRA)
     if not thgr.existe_hostgroup(lhostgroups, key):
         logger.warning(f'el grupo {key} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        grupo = thgr.get_hostgroup(lhostgroups,key)
+        grupo = thgr.get_hostgroup(lhostgroups,key)[1]
         if not grupo.existe_atributo(atributo):
             grupo.add_parametro([atributo,valor])
             logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
             thgr.aplicar_cambios(lhostgroups)
-        else: logger.warning(f'ya existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'ya existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
     logger.info('finalizando agregar_parametro_grupo', extra=cons.EXTRA)
 
 def modificar_atributo_grupo(lhostgroups, key, atributo, new):
     logger.info('iniciando modificar_atributo_grupo', extra=cons.EXTRA)
     if not thgr.existe_hostgroup(lhostgroups, key):
         logger.warning(f'el grupo {key} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        grupo = thgr.get_hostgroup(lhostgroups,key)
+        grupo = thgr.get_hostgroup(lhostgroups,key)[1]
         if grupo.existe_atributo(atributo):
             grupo.add_valor(atributo,new)
             thgr.aplicar_cambios(lhostgroups)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando modificar_atributo_grupo', extra=cons.EXTRA)
 
 def agregar_elemento_grupo(lhostgroups, key, atributo, dato): #puede add varios elems separados x , Ej w,c,r
     logger.info('iniciando agregar_elemento_grupo', extra=cons.EXTRA)
     if not thgr.existe_hostgroup(lhostgroups, key):
         logger.warning(f'el grupo {key} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        grupo = thgr.get_hostgroup(lhostgroups,key)
+        grupo = thgr.get_hostgroup(lhostgroups,key)[1]
         if grupo.existe_atributo(atributo):
             if not grupo.existe_elemento(atributo, dato):
                 grupo.add_elemento(atributo, dato)
                 thgr.aplicar_cambios(lhostgroups)
-            else: logger.warning(f'ya existe el elemento {dato} en {key}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'ya existe el elemento {dato} en {key}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 2
         else:
             grupo.add_parametro([atributo, dato])
             logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
@@ -458,25 +537,33 @@ def eliminar_elemento_grupo(lhostgroups, key, atributo, dato): #solo se puede el
     logger.info('iniciando eliminar_elemento_grupo', extra=cons.EXTRA)
     if not thgr.existe_hostgroup(lhostgroups, key):
         logger.warning(f'el grupo {key} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        grupo = thgr.get_hostgroup(lhostgroups, key)
+        grupo = thgr.get_hostgroup(lhostgroups, key)[1]
         if grupo.existe_atributo(atributo):
             if grupo.existe_elemento(atributo, dato):
                 grupo.del_elemento(atributo, dato)
                 thgr.aplicar_cambios(lhostgroups)
-            else: logger.warning(f'no existe el elemento {dato} en {key}', extra=cons.EXTRA)
-        else: logger.warning(f'no existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'no existe el elemento {dato} en {key}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 1
+        else:
+            logger.warning(f'no existe el atributo {atributo} en {key}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_elemento_grupo', extra=cons.EXTRA)
 
 def mostrar_atributo_grupo(lhostgroups, key, atributo):
     logger.info('iniciando mostrar_atributo_grupo', extra=cons.EXTRA)
     if not thgr.existe_hostgroup(lhostgroups, key):
         logger.warning(f'el grupo {key} no esta definido en {cons.ORIG_HGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        grupo = thgr.get_hostgroup(lhostgroups, key)
+        grupo = thgr.get_hostgroup(lhostgroups, key)[1]
         if grupo.existe_atributo(atributo):
             print(grupo.get_valor(atributo))
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_atributo_grupo', extra=cons.EXTRA)
 
 ##search
@@ -504,6 +591,8 @@ def search_atributo(lista, regex, atributo=None, show_name=False):
     else: aux = atributo
     out = [ x for x in lista if filtro.search(str(x.get_valor(aux))) ]
     logger.info(f'se encontraron {len(out)} coincidencias para el patron {filtro.pattern!r} en {aux}', extra=cons.EXTRA)
+    if (len(out) == 0):
+        cons.EXIT_CODE = 1
     try:
         for i in out:
             if show_name: print(i.get_name())
@@ -539,13 +628,15 @@ def generar_reporte(lista, file_in, file_out, separador_out=',', *atributos):
         for i in file_in:
             i = i.strip()
             if i != '':
-                obj = _get_objeto(lista, i)
-                data_row = {}
-                for atributo in atributos:
-                    if obj.existe_atributo(atributo, log=False):
-                        data_row[atributo] = obj.get_valor(atributo)
-                writer.writerow(data_row)
-                del data_row
+                encontrado, obj = _get_objeto(lista, i)
+                if (encontrado):
+                    data_row = {}
+                    for atributo in atributos:
+                        if obj.existe_atributo(atributo, log=False):
+                            data_row[atributo] = obj.get_valor(atributo)
+                    writer.writerow(data_row)
+                    del data_row
+                else: cons.EXIT_CODE = 1
     except IOError as e:
         if e.errno == errno.EPIPE:
             pass
@@ -562,7 +653,9 @@ def mostrar_command(lista, command):
     if tcmd.existe_command(lista, command):
         tcmd.show_command(lista,command)
         logger.info(f'se visualizo {command}', extra=cons.EXTRA)
-    else: logger.warning(f'no se encontro el command {command} definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_command', extra=cons.EXTRA)
 
 def eliminar_command(lista_commands, command_name):
@@ -570,15 +663,19 @@ def eliminar_command(lista_commands, command_name):
     if tcmd.existe_command(lista_commands, command_name):
         tcmd.delete_command(lista_commands, command_name)
         tcmd.aplicar_cambios(lista_commands)
-    else: logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el command {command_name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_command', extra=cons.EXTRA)
 
 def renombrar_command(lista_alarmas, lista_commands, command_name, new):
     logger.info('iniciando renombrar_command', extra=cons.EXTRA)
     if not tcmd.existe_command(lista_commands, command_name):
-        logger.warning(f'no existe definicion de {command_name} en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        logger.warning(f'el command {command_name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     elif tcmd.existe_command(lista_commands, new):
-        logger.warning(f'el contact {new} ya existe en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        logger.warning(f'el command {new} ya existe en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 2
     else:
         frecuencia = 0
         for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'check_command', command_name, sep='!'):
@@ -587,7 +684,7 @@ def renombrar_command(lista_alarmas, lista_commands, command_name, new):
         if frecuencia > 0:
             logger.info(f'se renombro {frecuencia} check_command en {cons.ORIG_SRV}', extra=cons.EXTRA)
             tser.aplicar_cambios(lista_alarmas)
-        command = tcmd.get_command(lista_commands, command_name)
+        command = tcmd.get_command(lista_commands, command_name)[1]
         command.rename_elemento(cons.ID_CMD, command_name, new, log=False)
         logger.info(f'se renombro {command_name} con {new} en {cons.ORIG_CMD}', extra=cons.EXTRA)
         tcmd.aplicar_cambios(lista_commands)
@@ -599,70 +696,91 @@ def copiar_command(lista_commands, command, new):
         if not tcmd.existe_command(lista_commands, new):
             tcmd.copy_command(lista_commands, command, new)
             tcmd.aplicar_cambios(lista_commands)
-        else: logger.warning(f'el command {new} ya existe en {cons.ORIG_CMD}', extra=cons.EXTRA)
-    else: logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'el command {new} ya existe en {cons.ORIG_CMD}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
+    else:
+        logger.warning(f'el command {command} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando copiar_command', extra=cons.EXTRA)
 
 def modificar_atributo_command(lista_commands, name, atributo, new):
     logger.info('iniciando modificar_atributo_command', extra=cons.EXTRA)
     if not tcmd.existe_command(lista_commands, name):
         logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        command = tcmd.get_command(lista_commands, name)
+        command = tcmd.get_command(lista_commands, name)[1]
         if command.existe_atributo(atributo):
             command.add_valor(atributo,new)
             tcmd.aplicar_cambios(lista_commands)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando modificar_atributo_command', extra=cons.EXTRA)
 
 def eliminar_atributo_command(lista_commands, name, atributo):
     logger.info('iniciando eliminar_atributo_command', extra=cons.EXTRA)
     if not tcmd.existe_command(lista_commands, name):
         logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        command = tcmd.get_command(lista_commands, name)
+        command = tcmd.get_command(lista_commands, name)[1]
         if command.existe_atributo(atributo):
             command.del_parametro(atributo)
             tcmd.aplicar_cambios(lista_commands)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_atributo_command', extra=cons.EXTRA)
 
 def mostrar_atributo_command(lista_commands, name, atributo):
     logger.info('iniciando mostrar_atributo_command', extra=cons.EXTRA)
     if not tcmd.existe_command(lista_commands, name):
         logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        command = tcmd.get_command(lista_commands, name)
+        command = tcmd.get_command(lista_commands, name)[1]
         if command.existe_atributo(atributo):
             print(command.get_valor(atributo))
-        else: logger.warning(f'no existe el command {name}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el command {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_atributo_command', extra=cons.EXTRA)
 
 def eliminar_elemento_command(lista_commands, name, atributo, dato): #solo se puede eliminar un elem a la vez
     logger.info('iniciando eliminar_elemento_command', extra=cons.EXTRA)
     if not tcmd.existe_command(lista_commands, name):
         logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        command = tcmd.get_command(lista_commands, name)
+        command = tcmd.get_command(lista_commands, name)[1]
         if command.existe_atributo(atributo):
             if command.existe_elemento(atributo, dato):
                 command.del_elemento(atributo, dato)
                 tcmd.aplicar_cambios(lista_commands)
-            else: logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
-        else: logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 1
+        else:
+            logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_elemento_command', extra=cons.EXTRA)
 
 def agregar_elemento_command(lista_commands, name, atributo, dato): #puede add varios elems separados x , Ej w,c,r
     logger.info('iniciando agregar_elemento_command', extra=cons.EXTRA)
     if not tcmd.existe_command(lista_commands, name):
         logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        command = tcmd.get_command(lista_commands, name)
+        command = tcmd.get_command(lista_commands, name)[1]
         if command.existe_atributo(atributo):
             if not command.existe_elemento(atributo, dato):
                 command.add_elemento(atributo, dato)
                 tcmd.aplicar_cambios(lista_commands)
-            else: logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 2
         else:
             command.add_parametro([atributo, dato])
             logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
@@ -673,13 +791,16 @@ def agregar_parametro_command(lista_commands, name, atributo, valor):
     logger.info('iniciando agregar_parametro_command', extra=cons.EXTRA)
     if not tcmd.existe_command(lista_commands, name):
         logger.warning(f'el command {name} no esta definido en {cons.ORIG_CMD}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        command = tcmd.get_command(lista_commands, name)
+        command = tcmd.get_command(lista_commands, name)[1]
         if not command.existe_atributo(atributo):
             command.add_parametro([atributo,valor])
             logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
             tcmd.aplicar_cambios(lista_commands)
-        else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
     logger.info('finalizando agregar_parametro_command', extra=cons.EXTRA)
 
 #Funciones para contacts
@@ -692,7 +813,9 @@ def mostrar_contact(lista, contact):
     if tcnt.existe_contact(lista, contact):
         tcnt.show_contact(lista,contact)
         logger.info(f'se visualizo {contact}', extra=cons.EXTRA)
-    else: logger.warning(f'no se encontro el contact {contact} definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'no se encontro el contact {contact} definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_contact', extra=cons.EXTRA)
 
 def eliminar_contact(lista_contactgroups, lista_alarmas, lista_hosts, lista_contacts, contact_name):
@@ -718,14 +841,18 @@ def eliminar_contact(lista_contactgroups, lista_alarmas, lista_hosts, lista_cont
         if frecuencia > 0: thos.aplicar_cambios(lista_hosts)
         tcnt.delete_contact(lista_contacts, contact_name)
         tcnt.aplicar_cambios(lista_contacts)
-    else: logger.warning(f'el contact {contact} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el contact {contact_name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
 
 def renombrar_contact(lista_contactgroups, lista_alarmas, lista_hosts, lista_contacts, contact_name, new):
     logger.info('iniciando renombrar_contact', extra=cons.EXTRA)
     if not tcnt.existe_contact(lista_contacts, contact_name):
-        logger.warning(f'no existe definicion de {contact_name} en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        logger.warning(f'el contact {contact_name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     elif tcnt.existe_contact(lista_contacts, new):
         logger.warning(f'el contact {new} ya existe en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 2
     else:
         frecuencia = 0
         for contactgroup in tcgr.get_parametro_in_contactgroup(lista_contactgroups, 'members', contact_name):
@@ -748,7 +875,7 @@ def renombrar_contact(lista_contactgroups, lista_alarmas, lista_hosts, lista_con
         if frecuencia > 0:
             logger.info(f'se renombro {frecuencia} hosts en {cons.ORIG_HST}', extra=cons.EXTRA)
             thos.aplicar_cambios(lista_hosts)
-        contact = tcnt.get_contact(lista_contacts, contact_name)
+        contact = tcnt.get_contact(lista_contacts, contact_name)[1]
         contact.rename_elemento(cons.ID_CNT, contact_name, new, log=False)
         logger.info(f'se renombro {contact_name} con {new} en {cons.ORIG_CNT}', extra=cons.EXTRA)
         tcnt.aplicar_cambios(lista_contacts)
@@ -760,8 +887,12 @@ def copiar_contact(lista_contacts, contact, new):
         if not tcnt.existe_contact(lista_contacts, new):
             tcnt.copy_contact(lista_contacts, contact, new)
             tcnt.aplicar_cambios(lista_contacts)
-        else: logger.warning(f'el contact {new} ya existe en {cons.ORIG_CNT}', extra=cons.EXTRA)
-    else: logger.warning(f'el contact {contact} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'el contact {new} ya existe en {cons.ORIG_CNT}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 3
+    else:
+        logger.warning(f'el contact {contact} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando copiar_contact', extra=cons.EXTRA)
 
 def mostrar_listado_contactgroup(lista_contacts, lista_contactgroups, contact_name):
@@ -775,69 +906,89 @@ def mostrar_listado_contactgroup(lista_contacts, lista_contactgroups, contact_na
         except IOError as e:
             if e.errno == errno.EPIPE: pass
         logger.info(f'se visualizo {frecuencia} contactgroups asociados al contact {contact_name}', extra=cons.EXTRA)
-    else: logger.warning(f'el contact {contact_name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        if (frecuencia == 0): cons.EXIT_CODE = 1
+    else:
+        logger.warning(f'el contact {contact_name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_listado_contactgroup', extra=cons.EXTRA)
 
 def modificar_atributo_contact(lista_contacts, name, atributo, new):
     logger.info('iniciando modificar_atributo_contact', extra=cons.EXTRA)
     if not tcnt.existe_contact(lista_contacts, name):
         logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contact = tcnt.get_contact(lista_contacts, name)
+        contact = tcnt.get_contact(lista_contacts, name)[1]
         if contact.existe_atributo(atributo):
             contact.add_valor(atributo,new)
             tcnt.aplicar_cambios(lista_contacts)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando modificar_atributo_contact', extra=cons.EXTRA)
 
 def eliminar_atributo_contact(lista_contacts, name, atributo):
     logger.info('iniciando eliminar_atributo_contact', extra=cons.EXTRA)
     if not tcnt.existe_contact(lista_contacts, name):
         logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contact = tcnt.get_contact(lista_contacts, name)
+        contact = tcnt.get_contact(lista_contacts, name)[1]
         if contact.existe_atributo(atributo):
             contact.del_parametro(atributo)
             tcnt.aplicar_cambios(lista_contacts)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_atributo_contact', extra=cons.EXTRA)
 
 def mostrar_atributo_contact(lista_contacts, name, atributo):
     logger.info('iniciando mostrar_atributo_contact', extra=cons.EXTRA)
     if not tcnt.existe_contact(lista_contacts, name):
         logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contact = tcnt.get_contact(lista_contacts, name)
+        contact = tcnt.get_contact(lista_contacts, name)[1]
         if contact.existe_atributo(atributo):
             print(contact.get_valor(atributo))
-        else: logger.warning(f'no existe el contact {name}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el contact {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_atributo_contact', extra=cons.EXTRA)
 
 def eliminar_elemento_contact(lista_contacts, name, atributo, dato): #solo se puede eliminar un elem a la vez
     logger.info('iniciando eliminar_elemento_contact', extra=cons.EXTRA)
     if not tcnt.existe_contact(lista_contacts, name):
         logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contact = tcnt.get_contact(lista_contacts, name)
+        contact = tcnt.get_contact(lista_contacts, name)[1]
         if contact.existe_atributo(atributo):
             if contact.existe_elemento(atributo, dato):
                 contact.del_elemento(atributo, dato)
                 tcnt.aplicar_cambios(lista_contacts)
-            else: logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
-        else: logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 1
+        else:
+            logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_elemento_contact', extra=cons.EXTRA)
 
 def agregar_elemento_contact(lista_contacts, name, atributo, dato): #puede add varios elems separados x , Ej w,c,r
     logger.info('iniciando agregar_elemento_contact', extra=cons.EXTRA)
     if not tcnt.existe_contact(lista_contacts, name):
         logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contact = tcnt.get_contact(lista_contacts, name)
+        contact = tcnt.get_contact(lista_contacts, name)[1]
         if contact.existe_atributo(atributo):
             if not contact.existe_elemento(atributo, dato):
                 contact.add_elemento(atributo, dato)
                 tcnt.aplicar_cambios(lista_contacts)
-            else: logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 2
         else:
             contact.add_parametro([atributo, dato])
             logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
@@ -848,13 +999,16 @@ def agregar_parametro_contact(lista_contacts, name, atributo, valor):
     logger.info('iniciando agregar_parametro_contact', extra=cons.EXTRA)
     if not tcnt.existe_contact(lista_contacts, name):
         logger.warning(f'el contact {name} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contact = tcnt.get_contact(lista_contacts, name)
+        contact = tcnt.get_contact(lista_contacts, name)[1]
         if not contact.existe_atributo(atributo):
             contact.add_parametro([atributo,valor])
             logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
             tcnt.aplicar_cambios(lista_contacts)
-        else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
     logger.info('finalizando agregar_parametro_contact', extra=cons.EXTRA)
 
 #Funciones para contactgroups
@@ -867,7 +1021,9 @@ def mostrar_contactgroup(lista, contactgroup):
     if tcgr.existe_contactgroup(lista, contactgroup):
         tcgr.show_contactgroup(lista,contactgroup)
         logger.info(f'se visualizo {contactgroup}', extra=cons.EXTRA)
-    else: logger.warning(f'no se encontro el contactgroup {contactgroup} definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'no se encontro el contactgroup {contactgroup} definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_contactgroup', extra=cons.EXTRA)
 
 def eliminar_contactgroup(lista_hosts, lista_alarmas, lista_contactgroups, contactgroup_name):
@@ -889,15 +1045,19 @@ def eliminar_contactgroup(lista_hosts, lista_alarmas, lista_contactgroups, conta
             tser.aplicar_cambios(lista_alarmas)
         tcgr.delete_contactgroup(lista_contactgroups, contactgroup_name)
         tcgr.aplicar_cambios(lista_contactgroups)
-    else: logger.warning(f'el contactgroup {contactgroup} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el contactgroup {contactgroup_name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_contactgroup', extra=cons.EXTRA)
 
 def renombrar_contactgroup(lista_alarmas, lista_hosts, lista_contactgroups, contactgroup_name, new):
     logger.info('iniciando renombrar_contactgroup', extra=cons.EXTRA)
     if not tcgr.existe_contactgroup(lista_contactgroups, contactgroup_name):
         logger.warning(f'no existe definicion de {contactgroup_name} en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     elif tcgr.existe_contactgroup(lista_contactgroups, new):
         logger.warning(f'el contactgroup {new} ya existe en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 2
     else:
         frecuencia = 0
         for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'contact_groups', contactgroup_name):
@@ -913,7 +1073,7 @@ def renombrar_contactgroup(lista_alarmas, lista_hosts, lista_contactgroups, cont
         if frecuencia > 0:
             logger.info(f'se renombro {frecuencia} hosts en {cons.ORIG_HST}', extra=cons.EXTRA)
             thos.aplicar_cambios(lista_hosts)
-        contactgroup = tcgr.get_contactgroup(lista_contactgroups, contactgroup_name)
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, contactgroup_name)[1]
         contactgroup.rename_elemento(cons.ID_CGR, contactgroup_name, new, log=False)
         logger.info(f'se renombro {contactgroup_name} con {new} en {cons.ORIG_CGR}', extra=cons.EXTRA)
         tcgr.aplicar_cambios(lista_contactgroups)
@@ -925,70 +1085,91 @@ def copiar_contactgroup(lista_contactgroups, contactgroup, new):
         if not tcgr.existe_contactgroup(lista_contactgroups, new):
             tcgr.copy_contactgroup(lista_contactgroups, contactgroup, new)
             tcgr.aplicar_cambios(lista_contactgroups)
-        else: logger.warning(f'el contactgroup {new} ya existe en {cons.ORIG_CGR}', extra=cons.EXTRA)
-    else: logger.warning(f'el contactgroup {contactgroup} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'el contactgroup {new} ya existe en {cons.ORIG_CGR}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
+    else:
+        logger.warning(f'el contactgroup {contactgroup} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando copiar_contactgroup', extra=cons.EXTRA)
 
 def modificar_atributo_contactgroup(lista_contactgroups, name, atributo, new):
     logger.info('iniciando modificar_atributo_contactgroup', extra=cons.EXTRA)
     if not tcgr.existe_contactgroup(lista_contactgroups, name):
         logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)[1]
         if contactgroup.existe_atributo(atributo):
             contactgroup.add_valor(atributo,new)
             tcgr.aplicar_cambios(lista_contactgroups)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando modificar_atributo_contactgroup', extra=cons.EXTRA)
 
 def eliminar_atributo_contactgroup(lista_contactgroups, name, atributo):
     logger.info('iniciando eliminar_atributo_contactgroup', extra=cons.EXTRA)
     if not tcgr.existe_contactgroup(lista_contactgroups, name):
         logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)[1]
         if contactgroup.existe_atributo(atributo):
             contactgroup.del_parametro(atributo)
             tcgr.aplicar_cambios(lista_contactgroups)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_atributo_contactgroup', extra=cons.EXTRA)
 
 def mostrar_atributo_contactgroup(lista_contactgroups, name, atributo):
     logger.info('iniciando mostrar_atributo_contactgroup', extra=cons.EXTRA)
     if not tcgr.existe_contactgroup(lista_contactgroups, name):
         logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)[1]
         if contactgroup.existe_atributo(atributo):
             print(contactgroup.get_valor(atributo))
-        else: logger.warning(f'no existe el contactgroup {name}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el contactgroup {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_atributo_contactgroup', extra=cons.EXTRA)
 
 def eliminar_elemento_contactgroup(lista_contactgroups, name, atributo, dato): #solo se puede eliminar un elem a la vez
     logger.info('iniciando eliminar_elemento_contactgroup', extra=cons.EXTRA)
     if not tcgr.existe_contactgroup(lista_contactgroups, name):
         logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)[1]
         if contactgroup.existe_atributo(atributo):
             if contactgroup.existe_elemento(atributo, dato):
                 contactgroup.del_elemento(atributo, dato)
                 tcgr.aplicar_cambios(lista_contactgroups)
-            else: logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
-        else: logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 1
+        else:
+            logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_elemento_contactgroup', extra=cons.EXTRA)
 
 def agregar_elemento_contactgroup(lista_contactgroups, name, atributo, dato): #puede add varios elems separados x , Ej w,c,r
     logger.info('iniciando agregar_elemento_contactgroup', extra=cons.EXTRA)
     if not tcgr.existe_contactgroup(lista_contactgroups, name):
         logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)[1]
         if contactgroup.existe_atributo(atributo):
             if not contactgroup.existe_elemento(atributo, dato):
                 contactgroup.add_elemento(atributo, dato)
                 tcgr.aplicar_cambios(lista_contactgroups)
-            else: logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 2
         else:
             contactgroup.add_parametro([atributo, dato])
             logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
@@ -999,13 +1180,16 @@ def agregar_parametro_contactgroup(lista_contactgroups, name, atributo, valor):
     logger.info('iniciando agregar_parametro_contactgroup', extra=cons.EXTRA)
     if not tcgr.existe_contactgroup(lista_contactgroups, name):
         logger.warning(f'el contactgroup {name} no esta definido en {cons.ORIG_CGR}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)
+        contactgroup = tcgr.get_contactgroup(lista_contactgroups, name)[1]
         if not contactgroup.existe_atributo(atributo):
             contactgroup.add_parametro([atributo,valor])
             logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
             tcgr.aplicar_cambios(lista_contactgroups)
-        else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
     logger.info('finalizando agregar_parametro_contactgroup', extra=cons.EXTRA)
 
 #Funciones para timeperiods
@@ -1018,7 +1202,9 @@ def mostrar_timeperiod(lista, timeperiod):
     if ttpe.existe_timeperiod(lista, timeperiod):
         ttpe.show_timeperiod(lista,timeperiod)
         logger.info(f'se visualizo {timeperiod}', extra=cons.EXTRA)
-    else: logger.warning(f'no se encontro el timeperiod {timeperiod} definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'no se encontro el timeperiod {timeperiod} definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_timeperiod', extra=cons.EXTRA)
 
 def eliminar_timeperiod(lista_timeperiods, timeperiod_name):
@@ -1026,15 +1212,19 @@ def eliminar_timeperiod(lista_timeperiods, timeperiod_name):
     if ttpe.existe_timeperiod(lista_timeperiods, timeperiod_name):
         ttpe.delete_timeperiod(lista_timeperiods, timeperiod_name)
         ttpe.aplicar_cambios(lista_timeperiods)
-    else: logger.warning(f'el timeperiod {timeperiod} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+    else:
+        logger.warning(f'el timeperiod {timeperiod_name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_timeperiod', extra=cons.EXTRA)
 
 def renombrar_timeperiod(lista_alarmas, lista_timeperiods, timeperiod_name, new):
     logger.info('iniciando renombrar_timeperiod', extra=cons.EXTRA)
     if not ttpe.existe_timeperiod(lista_timeperiods, timeperiod_name):
-        logger.warning(f'no existe definicion de {timeperiod_name} en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        logger.warning(f'el timeperiod {timeperiod_name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     elif ttpe.existe_timeperiod(lista_timeperiods, new):
-        logger.warning(f'el contact {new} ya existe en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        logger.warning(f'el timeperiod {new} ya existe en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 2
     else:
         frecuencia = 0
         for alarma in tser.get_parametro_in_alarma(lista_alarmas, 'check_period', timeperiod_name):
@@ -1050,7 +1240,7 @@ def renombrar_timeperiod(lista_alarmas, lista_timeperiods, timeperiod_name, new)
         if frecuencia > 0:
             logger.info(f'se renombro {frecuencia} notification_period en {cons.ORIG_SRV}', extra=cons.EXTRA)
             tser.aplicar_cambios(lista_alarmas)
-        timeperiod = ttpe.get_timeperiod(lista_timeperiods, timeperiod_name)
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, timeperiod_name)[1]
         timeperiod.add_valor(cons.ID_TPE, new)
         logger.info(f'se renombro {timeperiod_name} con {new} en {cons.ORIG_TPE}', extra=cons.EXTRA)
         ttpe.aplicar_cambios(lista_timeperiods)
@@ -1062,70 +1252,91 @@ def copiar_timeperiod(lista_timeperiods, timeperiod, new):
         if not ttpe.existe_timeperiod(lista_timeperiods, new):
             ttpe.copy_timeperiod(lista_timeperiods, timeperiod, new)
             ttpe.aplicar_cambios(lista_timeperiods)
-        else: logger.warning(f'el timeperiod {new} ya existe en {cons.ORIG_TPE}', extra=cons.EXTRA)
-    else: logger.warning(f'el timeperiod {timeperiod} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'el timeperiod {new} ya existe en {cons.ORIG_TPE}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
+    else:
+        logger.warning(f'el timeperiod {timeperiod} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     logger.info('finalizando copiar_timeperiod', extra=cons.EXTRA)
 
 def modificar_atributo_timeperiod(lista_timeperiods, name, atributo, new):
     logger.info('iniciando modificar_atributo_timeperiod', extra=cons.EXTRA)
     if not ttpe.existe_timeperiod(lista_timeperiods, name):
         logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)[1]
         if timeperiod.existe_atributo(atributo):
             timeperiod.add_valor(atributo,new)
             ttpe.aplicar_cambios(lista_timeperiods)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando modificar_atributo_timeperiod', extra=cons.EXTRA)
 
 def eliminar_atributo_timeperiod(lista_timeperiods, name, atributo):
     logger.info('iniciando eliminar_atributo_timeperiod', extra=cons.EXTRA)
     if not ttpe.existe_timeperiod(lista_timeperiods, name):
         logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)[1]
         if timeperiod.existe_atributo(atributo):
             timeperiod.del_parametro(atributo)
             ttpe.aplicar_cambios(lista_timeperiods)
-        else: logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el atributo {atributo}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_atributo_timeperiod', extra=cons.EXTRA)
 
 def mostrar_atributo_timeperiod(lista_timeperiods, name, atributo):
     logger.info('iniciando mostrar_atributo_timeperiod', extra=cons.EXTRA)
     if not ttpe.existe_timeperiod(lista_timeperiods, name):
         logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)[1]
         if timeperiod.existe_atributo(atributo):
             print(timeperiod.get_valor(atributo))
-        else: logger.warning(f'no existe el timeperiod {name}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'no existe el timeperiod {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando mostrar_atributo_timeperiod', extra=cons.EXTRA)
 
 def eliminar_elemento_timeperiod(lista_timeperiods, name, atributo, dato): #solo se puede eliminar un elem a la vez
     logger.info('iniciando eliminar_elemento_timeperiod', extra=cons.EXTRA)
     if not ttpe.existe_timeperiod(lista_timeperiods, name):
         logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)[1]
         if timeperiod.existe_atributo(atributo):
             if timeperiod.existe_elemento(atributo, dato):
                 timeperiod.del_elemento(atributo, dato)
                 ttpe.aplicar_cambios(lista_timeperiods)
-            else: logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
-        else: logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'no existe el elemento {dato} en {name}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 1
+        else:
+            logger.warning(f'no existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 1
     logger.info('finalizando eliminar_elemento_timeperiod', extra=cons.EXTRA)
 
 def agregar_elemento_timeperiod(lista_timeperiods, name, atributo, dato): #puede add varios elems separados x , Ej w,c,r
     logger.info('iniciando agregar_elemento_timeperiod', extra=cons.EXTRA)
     if not ttpe.existe_timeperiod(lista_timeperiods, name):
         logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)[1]
         if timeperiod.existe_atributo(atributo):
             if not timeperiod.existe_elemento(atributo, dato):
                 timeperiod.add_elemento(atributo, dato)
                 ttpe.aplicar_cambios(lista_timeperiods)
-            else: logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+            else:
+                logger.warning(f'ya existe el elemento {dato} en {name}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 2
         else:
             timeperiod.add_parametro([atributo, dato])
             logger.info(f'se agrego {atributo} {dato}', extra=cons.EXTRA)
@@ -1136,13 +1347,16 @@ def agregar_parametro_timeperiod(lista_timeperiods, name, atributo, valor):
     logger.info('iniciando agregar_parametro_timeperiod', extra=cons.EXTRA)
     if not ttpe.existe_timeperiod(lista_timeperiods, name):
         logger.warning(f'el timeperiod {name} no esta definido en {cons.ORIG_TPE}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     else:
-        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)
+        timeperiod = ttpe.get_timeperiod(lista_timeperiods, name)[1]
         if not timeperiod.existe_atributo(atributo):
             timeperiod.add_parametro([atributo,valor])
             logger.info(f'se agrego {atributo} {valor}', extra=cons.EXTRA)
             ttpe.aplicar_cambios(lista_timeperiods)
-        else: logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+        else:
+            logger.warning(f'ya existe el atributo {atributo} en {name}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 2
     logger.info('finalizando agregar_parametro_timeperiod', extra=cons.EXTRA)
 
 if __name__ == '__main__':

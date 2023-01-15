@@ -9,7 +9,7 @@
 # Copyright:   (c) Personal 2020
 # Licence:     <your licence>
 #-------------------------------------------------------------------------------
-from sys import path, argv
+from sys import path, argv, exit
 path.append('/data/source/')
 import ngctl.acciones.caller as call
 import ngctl.config.constantes as cons
@@ -550,3 +550,4 @@ if __name__ == '__main__':
     if len(argv) == 1:
         argv.append('-h')
     create_command()
+    exit(cons.EXIT_CODE)

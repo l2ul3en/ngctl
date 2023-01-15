@@ -67,9 +67,9 @@ def get_command(datos,command,log=True):
         if i.get_name() == command:
             if log:
                 logger.info(f'se obtuvo el command {command}', extra=cons.EXTRA)
-            return i
-    logger.error(f'no se encontro el command {command}, exit..', extra=cons.EXTRA)
-    raise SystemExit(2)
+            return (True, i)
+    logger.error(f'no se encontro el command {command}', extra=cons.EXTRA)
+    return (False, None)
 
 def delete_command(datos,command):
     """Elimina el command indicado."""

@@ -27,7 +27,7 @@ def cargar():
     """Devuelve una lista de objetos Hostgroup.
 
 Lee linea a linea el archivo especificado en constantes.py cargando todo las definiciones de hostgroups.
-  Lista     ->  [['hostgroup_name',['atributo valor1',...,'atributo valorN']]]"""
+Lista     ->  [['hostgroup_name',['atributo valor1',...,'atributo valorN']]]"""
     lista_group = []
     hostgroup = Hostgroup()
     with open (cons.DIR + cons.ORIG_HGR,'r') as f:
@@ -71,9 +71,9 @@ def get_hostgroup(datos,hostgroup,log=True):
         if i.get_name() == hostgroup:
             if log:
                 logger.info(f'se obtuvo el hostgroup {hostgroup}', extra=cons.EXTRA)
-            return i
-    logger.error(f'no se encontro el hostgroup {hostgroup}, exit..', extra=cons.EXTRA)
-    raise SystemExit(2)
+            return (True, i)
+    logger.error(f'no se encontro el hostgroup {hostgroup}', extra=cons.EXTRA)
+    return (False, None)
 
 def get_list_host_in_group(datos,host):
     """Devuelve un iterable con todos los objetos Hostgroup a los que pertenece el host."""

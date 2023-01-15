@@ -122,8 +122,10 @@ lista_contactgroups, hostname, ip, contact, *contactgroup):
     logger.info('iniciando generar_alarmas_basicas', extra=cons.EXTRA)
     if (not tcnt.existe_contact(lista_conctacts,contact)):
         logger.warning(f'el contact {contact} no esta definido en {cons.ORIG_CNT}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 1
     elif (thos.existe_host(lista_hosts, hostname)):
         logger.warning(f'el host {hostname} ya esta definido en {cons.ORIG_HST}', extra=cons.EXTRA)
+        cons.EXIT_CODE = 2
     else:
         estado, salida = verificar_ping(ip)
         if(estado):
@@ -151,9 +153,15 @@ lista_contactgroups, hostname, ip, contact, *contactgroup):
                         array = get_array_value(ip, oid, rf'{oid}\.{index} = STRING: ([A-Z]):.*')
                         _add_alarmas(lista_alarmas, hostname, f'HD_{array[0]}', cons.CMND_HD_WINDOWS)
                     tser.aplicar_cambios(lista_alarmas)
-                else: logger.warning('Sistema operativo no soportado', extra=cons.EXTRA)
-            else: logger.warning(f'no se tiene respuesta SNMP a {ip}', extra=cons.EXTRA)
-        else: logger.warning(f'no se tiene respuesta ICMP a {ip}: {salida}', extra=cons.EXTRA)
+                else:
+                    logger.warning('Sistema operativo no soportado', extra=cons.EXTRA)
+                    cons.EXIT_CODE = 5
+            else:
+                logger.warning(f'no se tiene respuesta SNMP a {ip}', extra=cons.EXTRA)
+                cons.EXIT_CODE = 4
+        else: 
+            logger.warning(f'no se tiene respuesta ICMP a {ip}: {salida}', extra=cons.EXTRA)
+            cons.EXIT_CODE = 3
     logger.info('finalizando generar_alarmas_basicas', extra=cons.EXTRA)
 
 if __name__ == '__main__':

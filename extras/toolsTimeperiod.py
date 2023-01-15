@@ -67,9 +67,9 @@ def get_timeperiod(datos,timeperiod,log=True):
         if i.get_name() == timeperiod:
             if log:
                 logger.info(f'se obtuvo el timeperiod {timeperiod}', extra=cons.EXTRA)
-            return i
-    logger.error(f'no se encontro el timeperiod {timeperiod}, exit..', extra=cons.EXTRA)
-    raise SystemExit(2)
+            return (True, i)
+    logger.error(f'no se encontro el timeperiod {timeperiod}', extra=cons.EXTRA)
+    return (False, None)
 
 def delete_timeperiod(datos,timeperiod):
     """Elimina el timeperiod indicado."""

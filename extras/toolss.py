@@ -2,7 +2,7 @@
 #-------------------------------------------------------------------------------
 # Purpose:     Funciones para procesamiento a nivel alarma (services.cfg)
 #-------------------------------------------------------------------------------
-from sys import path, exit as kill
+from sys import path
 path.append('../../')
 import ngctl.config.constantes as cons
 from ngctl.clases.Alarma import Alarma
@@ -169,16 +169,16 @@ def get_alarma(datos,name, host=None, log=True):
             if alarma.get_host() == host and alarma.get_name() == name:
                 if log:
                     logger.info(f'se obtuvo la alarma {name} en {host}', extra=cons.EXTRA)
-                return alarma
-        logger.error(f'no se encontro la alarma {name} en el host {host}, exit..', extra=cons.EXTRA)
+                return (True, alarma)
+        logger.error(f'no se encontro la alarma {name} en el host {host}', extra=cons.EXTRA)
     else:
         for alarma in datos:
             if alarma.get_name() == name:
                 if log:
                     logger.info(f'se obtuvo la alarma {name}', extra=cons.EXTRA)
-                return alarma
-        logger.error(f'no se encontro la alarma {name}, exit..', extra=cons.EXTRA)
-    kill(254)
+                return (True, alarma)
+        logger.error(f'no se encontro la alarma {name}', extra=cons.EXTRA)
+    return (False, None)
 
 def delete_alarma(datos,name,host=None):
     """Elimina las alarma asociadas a name."""

@@ -6,6 +6,15 @@ path.append('../../')
 #usuario que ejecuta la app
 EXTRA = {'user' : geto('whoami')}
 
+#Variable de codigo de salida
+#0 = exitoso
+#1 = objeto no encontrado
+#2 = el objeto ya existe
+#3 = no hay ping
+#4 = no hay snmp
+#5 = SO no soportado
+EXIT_CODE = 0
+
 #archivo de log de la app
 LOG = '/var/log/nagios/nagiosctl.log'
 

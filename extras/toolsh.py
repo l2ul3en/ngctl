@@ -69,9 +69,9 @@ def get_host(datos,host, log=True):
         if i.get_name() == host and i.get_tipo() == 'define host{':
             if log:
                 logger.info(f'se obtuvo el host {host}', extra=cons.EXTRA)
-            return i
+            return (True, i)
     logger.error(f'no se encontro el host {host}, exit..', extra=cons.EXTRA)
-    raise SystemExit(2)
+    return (False, None)
 
 def get_parametro_in_host(datos, atributo, name):
     """Devuelve un iterable con todos los objetos host a los que pertenece name."""

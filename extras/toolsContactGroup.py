@@ -71,9 +71,9 @@ def get_contactgroup(datos,contactgroup,log=True):
         if i.get_name() == contactgroup:
             if log:
                 logger.info(f'se obtuvo el contactgroup {contactgroup}', extra=cons.EXTRA)
-            return i
-    logger.error(f'no se encontro el contactgroup {contactgroup}, exit..', extra=cons.EXTRA)
-    raise SystemExit(2)
+            return (True, i)
+    logger.error(f'no se encontro el contactgroup {contactgroup}', extra=cons.EXTRA)
+    return (False, None)
 
 def delete_contactgroup(datos,contactgroup):
     """Elimina el contactgroup indicado."""

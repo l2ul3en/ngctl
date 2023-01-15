@@ -67,9 +67,9 @@ def get_contact(datos,contact,log=True):
         if i.get_name() == contact:
             if log:
                 logger.info(f'se obtuvo el contact {contact}', extra=cons.EXTRA)
-            return i
+            return (True, i)
     logger.error(f'no se encontro el contact {contact}, exit..', extra=cons.EXTRA)
-    raise SystemExit(2)
+    return (False, None)
 
 def delete_contact(datos,contact):
     """Elimina el contact indicado."""
