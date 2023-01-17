@@ -38,7 +38,7 @@ Lista     ->  [['hostgroup_name',['atributo valor1',...,'atributo valorN']]]"""
             if (';' in i):
                 i = i[:i.find(';')]
             i = i.strip()
-            if i == '':
+            if i == '' or i.startswith('define'):
                 continue
             elif i.startswith('}'):
                 hostgroup.ordenar(rev=False)
