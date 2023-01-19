@@ -22,13 +22,10 @@ class Alarma(Body):
 
     def __init__(self):
         super().__init__()
-        self.__tipo = 'define '
+        self.__tipo = ''
 
     def __str__(self):
-        return self.__tipo + '\n' + super().__str__() + '}'
-
-    def get_id(self):
-        return self.__id
+        return 'define ' + self.__tipo + '{\n' + super().__str__() + '}'
 
     def get_name(self):
         return super().get_valor(cons.ID_SRV)
@@ -37,19 +34,22 @@ class Alarma(Body):
         return super().get_valor(cons.ID_HST)
 
     def add_tipo(self,tipo):
-        self.__tipo += tipo
+        self.__tipo = tipo
 
     def get_tipo(self):
         return self.__tipo
 
     def __eq__(self, other):
-        return self.__tipo == other.__tipo and self.get_host() == other.get_host() and self.get_name() == other.get_name()
+        return self.__tipo == other.get_tipo() and self.get_host() == \
+        other.get_host() and self.get_name() == other.get_name()
 
     def __gt__(self,other):
-        return self.__tipo == other.__tipo and self.get_host() == other.get_host() and self.get_name() > other.get_name()
+        return self.__tipo == other.get_tipo() and self.get_host() == \
+        other.get_host() and self.get_name() > other.get_name()
 
     def __ge__(self,other):
-        return self.__tipo == other.__tipo and self.get_host() == other.get_host() and self.get_name() >= other.get_name()
+        return self.__tipo == other.get_tipo() and self.get_host() == \
+        other.get_host() and self.get_name() >= other.get_name()
 
 if __name__ == '__main__':
     l = Alarma()

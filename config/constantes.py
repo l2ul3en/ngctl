@@ -6,6 +6,9 @@ path.append('../../')
 #usuario que ejecuta la app
 EXTRA = {'user' : geto('whoami')}
 
+#Expresion regular para obtener el tipo de objeto nagios
+PATRON = r'^(\w+)\s*{$'
+
 #Variable de codigo de salida
 #0 = exitoso
 #1 = objeto no encontrado
@@ -39,7 +42,7 @@ DIR = '/data/objects/'  #path completo a los archivos (.cfg) de configuracion de
 DIR_BK = '/data/backup/'  #path completo donde se guardaran los archivos de respaldo luego de un cambio (solo se guarda el ultimo cambio)
 DIR_TMP = '/data/cache/'  #path completo donde se guardaran los archivos temporales
 
-#si se procesaran nuevos archivos de configuracion se deben agregar 4 nuevas constantes para su funcionamiento
+#si se procesaran nuevos archivos de configuracion se deben agregar 5 nuevas constantes para su funcionamiento
 #1. Archivos de objetos de configuracion nagios
 ORIG_SRV = 'services.cfg'
 ORIG_HST = 'hosts.cfg'
@@ -75,6 +78,15 @@ ID_CMD = 'command_name'
 ID_CNT = 'contact_name'
 ID_CGR = 'contactgroup_name'
 ID_TPE = 'timeperiod_name'
+
+#5. identificador de objeto nagios
+OB_SRV = 'service'
+OB_HST = 'host'
+OB_HGR = 'hostgroup'
+OB_CMD = 'command'
+OB_CNT = 'contact'
+OB_CGR = 'contactgroup'
+OB_TPE = 'timeperiod'
 
 if __name__ == '__main__':
 	pass

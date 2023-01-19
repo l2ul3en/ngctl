@@ -30,7 +30,7 @@ Lee linea a linea el archivo especificado en constantes.py cargando todo las def
 Lista     ->  [['host_name',['atributo valor1',...,'atributo valorN']]]"""
     lista_hosts = []
     host = Host()
-    regex = re.compile(r'\s+')
+    regex = re.compile(cons.PATRON)
     with open (cons.DIR + cons.ORIG_HST,'r') as f:
         for i in f:
             #Se eliminan los comentarios que empiezan por '#' o ';'
@@ -42,7 +42,7 @@ Lista     ->  [['host_name',['atributo valor1',...,'atributo valorN']]]"""
             if i == '':
                 continue
             elif i.startswith('}'):
-                host.add_tipo(regex.sub('',host.get_valor('define')))
+                host.add_tipo(regex.sub(r'\1',host.get_valor('define')))
                 host.del_parametro('define',log=False)
                 host.ordenar(rev=True)
                 lista_hosts.append(host)
@@ -66,7 +66,7 @@ def _procesar(cad,char):
 def get_host(datos,host, log=True):
     """Retorna el objeto Host."""
     for i in datos:
-        if i.get_name() == host and i.get_tipo() == 'define host{':
+        if i.get_name() == host and i.get_tipo() == cons.OB_HST:
             if log:
                 logger.info(f'se obtuvo el host {host}', extra=cons.EXTRA)
             return (True, i)
@@ -81,21 +81,21 @@ def delete_host(datos,host):
     """Elimina las alarmas asociadas al host inidicado."""
     i = 0
     while i < len(datos):
-        while i < len(datos) and datos[i].get_name() == host and datos[i].get_tipo() == 'define host{':
+        while i < len(datos) and datos[i].get_name() == host and datos[i].get_tipo() == cons.OB_HST:
             del datos[i]
             logger.info(f'se elimino el host {host}', extra=cons.EXTRA)
         i += 1
 
 def show_host(datos,host):
     """Imprime por pantalla la config del host indicado."""
-    for i in (x for x in datos if x.get_name() == host and x.get_tipo() == 'define host{'):
+    for i in (x for x in datos if x.get_name() == host and x.get_tipo() == cons.OB_HST):
         print(i)
 
 def copy_host(datos,old,new,ip=None):
     """Realiza la copia de todas las alarmas del host old hacia el host new."""
     host = Host()
     for i in range(len(datos)):
-        if datos[i].get_name() == old and datos[i].get_tipo() == 'define host{':
+        if datos[i].get_name() == old and datos[i].get_tipo() == cons.OB_HST:
             host = copiar(datos[i])
             datos.append(host)
             datos[-1].add_valor(cons.ID_HST, new)
@@ -107,13 +107,13 @@ def copy_host(datos,old,new,ip=None):
 def existe_host(datos,host):
     """Verifica si el host existe"""
     for x in datos:
-        if x.get_name() == host and x.get_tipo() == 'define host{':
+        if x.get_name() == host and x.get_tipo() == cons.OB_HST:
             return True
     return False
 
 def rename_host(datos, host, new):
     for i in range(len(datos)):
-        if datos[i].get_name() == host and datos[i].get_tipo() == 'define host{':
+        if datos[i].get_name() == host and datos[i].get_tipo() == cons.OB_HST:
             datos[i].add_valor(cons.ID_HST, new)
             datos[i].add_valor('alias',new)
             logger.info(f'se actualizo el nombre de {host} a {new} en {cons.ORIG_HST}', extra=cons.EXTRA)
@@ -122,7 +122,7 @@ def get_cantidad(datos):
     """Retorna la cantidad de definiciones host en Hosts.cfg."""
     c = 0
     for i in datos:
-        if i.get_tipo() == 'define host{':
+        if i.get_tipo() == cons.OB_HST:
             c += 1
     return c
 

@@ -12,21 +12,28 @@ class Timeperiod(Body):
 
     def __init__(self):
         super().__init__()
+        self.__tipo = ''
 
     def __str__(self):
-        return 'define timeperiod{' + '\n' + super().__str__() + '}'
+        return 'define ' + self.__tipo + '{\n' + super().__str__() + '}'
 
     def get_name(self):
         return super().get_valor(cons.ID_TPE)
 
+    def add_tipo(self,tipo):
+        self.__tipo = tipo
+
+    def get_tipo(self):
+        return self.__tipo
+
     def __eq__(self, other):
-        return self.get_name() == other.get_name()
+        return self.__tipo == other.get_tipo() and self.get_name() == other.get_name()
 
     def __gt__(self, other):
-        return self.get_name() > other.get_name()
+        return self.__tipo == other.get_tipo() and self.get_name() > other.get_name()
 
     def __ge__(self, other):
-        return self.get_name() >= other.get_name()
+        return self.__tipo == other.get_tipo() and self.get_name() >= other.get_name()
 
 if __name__ == '__main__':
     pass
