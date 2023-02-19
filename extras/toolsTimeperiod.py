@@ -51,9 +51,7 @@ Lista -> [{'tipo',[['atributo',valor1'],...,['atributo','valorN']]}]"""
                     lista_timeperiod.append(timeperiod)
                 timeperiod = Timeperiod()
             else:
-                if ',' in i:
-                    timeperiod.add_parametro(_procesar(i,','))
-                else: timeperiod.add_parametro(i.split(maxsplit=1))
+                timeperiod.add_parametro(i.split(maxsplit=1))
     return lista_timeperiod
 
 def _procesar(cad,char):

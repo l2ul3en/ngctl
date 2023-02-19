@@ -50,21 +50,9 @@ Lista -> [{'tipo',[['atributo', 'valor1'],...,['atributo', 'valorN']}]."""
                 if command.existe_atributo(cons.ID_CMD, log=False):
                     lista_command.append(command)
                 command = Command()
-            else:
-                if ',' in i:
-                    command.add_parametro(_procesar(i,','))
-                else: command.add_parametro(i.split(maxsplit=1))
+            else: #No se procesa las ','
+                command.add_parametro(i.split(maxsplit=1))
     return lista_command
-
-def _procesar(cad,char):
-    atr = cad.split(maxsplit=1)[0]
-    lista = cad.split(maxsplit=1)[1].split(char)
-    lista = [i.strip() for i in lista if i != '']
-    lista.sort(key=str.lower)
-    if len(lista) == 1:
-        val = ''.join(lista)
-    else: val = char.join(lista)
-    return [atr,val]
 
 def get_command(datos,command,log=True):
     """Retorna el objeto command."""
