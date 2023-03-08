@@ -53,14 +53,14 @@ class Alarma(Body):
 
 if __name__ == '__main__':
     l = Alarma()
-    l.add_tipo('service{')
+    l.add_tipo('service')
     l.add_parametro(['host_name','Siga'])
     l.add_parametro(['service_description','siga_ping'])
     l.add_parametro(['check','tartaer'])
     l.add_parametro(['contacs','lopeze'])
     print(l)
     f = Alarma()
-    f.add_tipo('service{')
+    f.add_tipo('service')
     f.add_parametro(['host_name','siga'])
     f.add_parametro(['service_description','siga_ping'])
     f.add_parametro(['check','tartaer'])

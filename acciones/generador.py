@@ -40,7 +40,7 @@ def get_array_value(ip, oid, patron, opc=''):
 def _add_alarmas(lista_alarmas, host, servicio, comando):
     """Agrega una alarma solo en memoria RAM."""
     alarma = Alarma()
-    alarma.add_tipo('service{')
+    alarma.add_tipo('service')
     alarma.add_parametro(['use','DEFAULT'])
     alarma.add_parametro(['service_description',f'{host}_{servicio}'])
     alarma.add_parametro(['host_name',host])
@@ -56,7 +56,7 @@ def _add_alarmas(lista_alarmas, host, servicio, comando):
 def _add_host(lista_hosts, lista_contactgroups, host, ip, contact, contactgroup):
     """Agrega un host y aplica cambio persistente."""
     hostname = Host()
-    hostname.add_tipo('host{')
+    hostname.add_tipo('host')
     hostname.add_parametro(['use','DEFAULT'])
     hostname.add_parametro(['host_name',host])
     hostname.add_parametro(['address',ip])
