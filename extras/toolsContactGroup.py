@@ -33,13 +33,12 @@ Lista -> [{'tipo',[['atributo', 'valor1'],...,['atributo', 'valorN']}]."""
     regex = re.compile(cons.PATRON)
     with open (cons.DIR + cons.ORIG_CGR,'r') as f:
         for i in f:
-            #Se eliminan los comentarios que empiezan por '#' o ';'
-            if ('#' in i):
-                i = i[:i.find('#')]
+            #Se eliminan los comentarios que contienen ';'
             if (';' in i):
                 i = i[:i.find(';')]
-            i = i.strip()
-            if i == '':
+            i = i.strip() #elimina espacios de extremos
+            #No se toman en cuenta vacios o comentarios que inician con '#'
+            if i == '' or i.startswith('#'):
                 continue
             elif i.startswith('}'):
                 contactgroup.add_tipo(regex.sub(r'\1',\
