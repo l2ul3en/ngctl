@@ -355,7 +355,7 @@ def create_command():
     group_hgr = hgroup.add_mutually_exclusive_group()
     group_hgr.add_argument('-c','--copy',metavar=f'NEW_{cons.ID_HGR.upper()}',action='store',help=f'copia {cons.ID_HGR} para NEW_{cons.ID_HGR.upper()}')
     group_hgr.add_argument('-d', '--delete', action='store_true',default=False,help=f'elimina {cons.ID_HGR}')
-    group_hgr.add_argument('-l','--list',action='store_true',default=False,dest='lista_host',help=f'muestra una lista de hosts asociados a {cons.ID_HGR}')
+    group_hgr.add_argument('-l','--list',action='store_true',default=False,dest='lista_host',help=f'muestra una lista de hosts/grupos asociados a {cons.ID_HGR}')
     group_hgr.add_argument('-r', '--rename',metavar=f'NEW_{cons.ID_HGR.upper()}', action='store',help=f'cambia {cons.ID_HGR} con NEW_{cons.ID_HGR.upper()}')
     group_hgr.add_argument('-s', '--show', action='store_true',default=False,help=f'muestra la configuracion de {cons.ID_HGR}')
     hgroup.set_defaults(func=exec_hostgroup)

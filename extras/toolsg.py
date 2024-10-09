@@ -46,7 +46,8 @@ Lista -> [{'tipo',[['atributo', 'valor1'],...,['atributo', 'valorN']}]."""
                     hostgroup.get_valor('define')))
                 hostgroup.del_parametro('define', log=False)
                 hostgroup.ordenar(rev=False)
-                if hostgroup.existe_atributo('members',log=False):
+                if hostgroup.existe_atributo('members',log=False) or \
+                hostgroup.existe_atributo('hostgroup_members',log=False):
                     lista_group.append(hostgroup)
                 hostgroup = Hostgroup()
             else:
@@ -87,10 +88,19 @@ def get_listado_hosts(datos,hostgroup):
     return [x.get_valor('members') for x in datos \
     if x.get_name() == hostgroup and x.get_tipo() == cons.OB_HGR]
 
+def get_listado_grupos(datos,hostgroup):
+    """Devuelve una lista con todos los hosts asociados a hostgroup."""
+    return [x.get_valor('hostgroup_members') for x in datos \
+    if x.get_name() == hostgroup and x.get_tipo() == cons.OB_HGR]
+
 def delete_hostgroup(datos,hostgroup):
-    """Elimina el grupo asociado al hostgroup inidicado."""
+    """Elimina el grupo asociado al hostgroup indicado."""
     i = 0
     while i < len(datos):
+        if datos[i].existe_elemento('hostgroup_members', hostgroup):
+            datos[i].del_elemento('hostgroup_members', hostgroup, log=False)
+            logger.info(f'se elimino el subgrupo {hostgroup} del grupo \
+{datos[i].get_name()}', extra=cons.EXTRA)
         while i < len(datos) and datos[i].get_name() == hostgroup \
             and datos[i].get_tipo() == cons.OB_HGR:
             del datos[i]

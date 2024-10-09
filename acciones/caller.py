@@ -456,7 +456,17 @@ def mostrar_listado_hosts(lhostgroups, grupo):
                     for j in i.split(','):
                         print(j)
                         c += 1
-                    logger.info(f'se visualizo {c} hosts asociados al grupo {grupo}', extra=cons.EXTRA)
+                    logger.info(f'se visualizo {c} host(s) asociados al grupo {grupo}', extra=cons.EXTRA)
+            except IOError as e:
+                if e.errno == errno.EPIPE: pass
+        elif hostgroup.existe_atributo('hostgroup_members'):
+            try:
+                for i in thgr.get_listado_grupos(lhostgroups,grupo):
+                    c = 0
+                    for j in i.split(','):
+                        print(j)
+                        c += 1
+                    logger.info(f'se visualizo {c} grupo(s) asociados al grupo {grupo}', extra=cons.EXTRA)
             except IOError as e:
                 if e.errno == errno.EPIPE: pass
         else:
